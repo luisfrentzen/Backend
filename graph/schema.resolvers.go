@@ -20,6 +20,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser)
 	_, err := r.DB.Model(&user).Insert()
 
 	if err != nil {
+		fmt.Println(err)
 		return nil, errors.New("Insert new user failed")
 	}
 

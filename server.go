@@ -15,12 +15,19 @@ import (
 const defaultPort = "8080"
 
 func main() {
-	db := pg.Connect(&pg.Options{
-		Addr:     "postgres://pgogvipbnkibet:f81c58a58203d8adb2589461aedb28b997f4aa980c2bec1754f10c8d179112b3@ec2-52-200-48-116.compute-1.amazonaws.com:5432/dbln7qhliqr8to",
-		User:     "pgogvipbnkibet",
-		Password: "f81c58a58203d8adb2589461aedb28b997f4aa980c2bec1754f10c8d179112b3",
-		Database: "dbln7qhliqr8to",
-	})
+	//db := pg.Connect(&pg.Options{
+	//	Addr:     "ec2-52-200-48-116.compute-1.amazonaws.com:5432",
+	//	User:     "pgogvipbnkibet",
+	//	Password: "f81c58a58203d8adb2589461aedb28b997f4aa980c2bec1754f10c8d179112b3",
+	//	Database: "dbln7qhliqr8to",
+	//})
+
+	opt, err := pg.ParseURL("postgres://pgogvipbnkibet:f81c58a58203d8adb2589461aedb28b997f4aa980c2bec1754f10c8d179112b3@ec2-52-200-48-116.compute-1.amazonaws.com:5432/dbln7qhliqr8to?sslmode=require")
+	if err != nil {
+		panic(err)
+	}
+
+	db := pg.Connect(opt)
 
 	port := os.Getenv("PORT")
 	if port == "" {
