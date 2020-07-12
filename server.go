@@ -16,7 +16,7 @@ const defaultPort = "8080"
 
 func main() {
 	db := pg.Connect(&pg.Options{
-		Addr:     ":5432",
+		Addr:     "localhost:5432",
 		User:     "postgres",
 		Password: "Myself3012",
 		Database: "FesTubeDB",
