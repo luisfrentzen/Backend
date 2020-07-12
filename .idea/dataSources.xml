@@ -7,5 +7,11 @@
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://localhost:5432/FesTubeDB</jdbc-url>
     </data-source>
+    <data-source source="LOCAL" name="dbln7qhliqr8to@ec2-52-200-48-116.compute-1.amazonaws.com" uuid="022ea064-8f64-4026-8fc0-dfd4709a9072">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://ec2-52-200-48-116.compute-1.amazonaws.com:5432/dbln7qhliqr8to</jdbc-url>
+    </data-source>
   </component>
 </project>
