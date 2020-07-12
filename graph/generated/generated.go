@@ -308,7 +308,7 @@ var sources = []*ast.Source{
 #
 # https://gqlgen.com/getting-started/
 type User {
-  id: ID!
+  id: String!
   name: String!
 }
 
@@ -326,6 +326,7 @@ type Query {
 }
 
 input newUser {
+  id: String!
   name: String!
 }
 
@@ -971,7 +972,7 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_name(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
@@ -2205,6 +2206,12 @@ func (ec *executionContext) unmarshalInputnewUser(ctx context.Context, obj inter
 
 	for k, v := range asMap {
 		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "name":
 			var err error
 			it.Name, err = ec.unmarshalNString2string(ctx, v)
