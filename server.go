@@ -10,11 +10,23 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/go-chi/chi"
+	"github.com/rs/cors"
 )
 
 const defaultPort = "8080"
 
 func main() {
+	router := chi.NewRouter()
+
+	// Add CORS middleware around every request
+	// See https://github.com/rs/cors for full option listing
+	router.Use(cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:8080"},
+		AllowCredentials: true,
+		Debug:            true,
+	}).Handler)
 	//db := pg.Connect(&pg.Options{
 	//	Addr:     "ec2-52-200-48-116.compute-1.amazonaws.com:5432",
 	//	User:     "pgogvipbnkibet",
@@ -22,7 +34,7 @@ func main() {
 	//	Database: "dbln7qhliqr8to",
 	//})
 
-	opt, err := pg.ParseURL("postgres://pgogvipbnkibet:f81c58a58203d8adb2589461aedb28b997f4aa980c2bec1754f10c8d179112b3@ec2-52-200-48-116.compute-1.amazonaws.com:5432/dbln7qhliqr8to?sslmode=require")
+		opt, err := pg.ParseURL("postgres://pgogvipbnkibet:f81c58a58203d8adb2589461aedb28b997f4aa980c2bec1754f10c8d179112b3@ec2-52-200-48-116.compute-1.amazonaws.com:5432/dbln7qhliqr8to?sslmode=require")
 	if err != nil {
 		panic(err)
 	}
@@ -36,9 +48,9 @@ func main() {
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: db}}))
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	router.Handle("/query", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
