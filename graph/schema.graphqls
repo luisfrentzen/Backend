@@ -31,6 +31,8 @@ type Query {
 input newUser {
   id: String!
   name: String!
+  profilepic: String!
+  premium: String!
 }
 
 input newVideo {
