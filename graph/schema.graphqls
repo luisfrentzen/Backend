@@ -29,6 +29,7 @@ type Query {
   users: [User!]!
   videos: [Video!]!
   videosByUser(userid: String!): [Video!]!
+  userById(userid: String!): [User!]!
 }
 
 input newUser {

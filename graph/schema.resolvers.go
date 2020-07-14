@@ -74,6 +74,7 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 	fkErr := r.DB.Model(&user).Where("id = ?", input.Userid).First()
 
 	if fkErr != nil {
+		fmt.Println(fkErr)
 		return nil, errors.New("User not found")
 	}
 
@@ -96,6 +97,7 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 	_, err := r.DB.Model(&video).Insert()
 
 	if err != nil {
+		fmt.Println(err)
 		return nil, errors.New("Insert new video failed")
 	}
 
@@ -175,6 +177,19 @@ func (r *queryResolver) VideosByUser(ctx context.Context, userid string) ([]*mod
 	}
 
 	return videos, nil
+}
+
+func (r *queryResolver) UserByID(ctx context.Context, userid string) ([]*model.User, error) {
+	var user []*model.User
+
+	err := r.DB.Model(&user).Where("id = ?", userid).First()
+
+	if err != nil {
+		fmt.Println(err)
+		return nil, errors.New("Failed to query user")
+	}
+
+	return user, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
