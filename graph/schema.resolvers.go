@@ -71,7 +71,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVideo) (*model.Video, error) {
 	var user model.User
 
-	fkErr := r.DB.Model(&user).Where("id = ?", input.UserID).First()
+	fkErr := r.DB.Model(&user).Where("id = ?", input.Userid).First()
 
 	if fkErr != nil {
 		return nil, errors.New("User not found")
