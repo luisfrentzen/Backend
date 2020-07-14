@@ -13,14 +13,16 @@ import (
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser) (*model.User, error) {
 	user := model.User{
-		ID:   input.ID,
-		Name: input.Name,
+		ID:         input.ID,
+		Name:       input.Name,
+		Profilepic: input.Profilepic,
+		Premium:    input.Premium,
 	}
 
 	_, err := r.DB.Model(&user).Insert()
 
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
 		return nil, errors.New("Insert new user failed")
 	}
 
@@ -76,9 +78,16 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 	}
 
 	video := model.Video{
-		Title:  input.Title,
-		URL:    input.URL,
-		Userid: input.UserID,
+		Title:       input.Title,
+		URL:         input.URL,
+		Userid:      input.Userid,
+		Desc:        input.Desc,
+		Location:    input.Location,
+		Visibility:  input.Visibility,
+		Thumbnail:   input.Thumbnail,
+		Playlist:    input.Playlist,
+		Restriction: input.Restriction,
+		Category:    input.Category,
 	}
 
 	_, err := r.DB.Model(&video).Insert()

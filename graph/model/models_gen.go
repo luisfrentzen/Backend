@@ -35,8 +35,10 @@ type NewVideo struct {
 	Title       string `json:"title"`
 	Thumbnail   string `json:"thumbnail"`
 	Restriction string `json:"restriction"`
+	Desc        string `json:"desc"`
+	Category    string `json:"category"`
 	Playlist    string `json:"playlist"`
 	Visibility  string `json:"visibility"`
 	Location    string `json:"location"`
-	UserID      string `json:"userID"`
+	Userid      string `json:"userid"`
 }

@@ -40,10 +40,12 @@ input newVideo {
   title: String!
   thumbnail: String!
   restriction: String!
+  desc: String!
+  category: String!
   playlist: String!
   visibility: String!
   location: String!
-  userID: String!
+  userid: String!
 }
 
 type Mutation {

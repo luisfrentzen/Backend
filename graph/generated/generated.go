@@ -418,10 +418,12 @@ input newVideo {
   title: String!
   thumbnail: String!
   restriction: String!
+  desc: String!
+  category: String!
   playlist: String!
   visibility: String!
   location: String!
-  userID: String!
+  userid: String!
 }
 
 type Mutation {
@@ -2660,6 +2662,18 @@ func (ec *executionContext) unmarshalInputnewVideo(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
+		case "desc":
+			var err error
+			it.Desc, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "category":
+			var err error
+			it.Category, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "playlist":
 			var err error
 			it.Playlist, err = ec.unmarshalNString2string(ctx, v)
@@ -2678,9 +2692,9 @@ func (ec *executionContext) unmarshalInputnewVideo(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
-		case "userID":
+		case "userid":
 			var err error
-			it.UserID, err = ec.unmarshalNString2string(ctx, v)
+			it.Userid, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
