@@ -4,6 +4,8 @@
 type User {
   id: String!
   name: String!
+  profilepic: String!
+  premium: String!
 }
 
 type Video {
@@ -12,6 +14,8 @@ type Video {
   title: String!
   thumbnail: String!
   restriction: String!
+  desc: String!
+  category: String!
   playlist: String!
   visibility: String!
   location: String!
