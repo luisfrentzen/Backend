@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser) (*model.User, error) {
@@ -185,7 +186,7 @@ func (r *queryResolver) UserByID(ctx context.Context, userid string) ([]*model.U
 	err := r.DB.Model(&user).Where("id = ?", userid).First()
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return nil, errors.New("Failed to query user")
 	}
 
