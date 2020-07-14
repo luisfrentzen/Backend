@@ -3,24 +3,40 @@
 package model
 
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Profilepic string `json:"profilepic"`
+	Premium    string `json:"premium"`
 }
 
 type Video struct {
-	ID     string `json:"id"`
-	URL    string `json:"url"`
-	Title  string `json:"title"`
-	Userid string `json:"userid"`
+	ID          string `json:"id"`
+	URL         string `json:"url"`
+	Title       string `json:"title"`
+	Thumbnail   string `json:"thumbnail"`
+	Restriction string `json:"restriction"`
+	Desc        string `json:"desc"`
+	Category    string `json:"category"`
+	Playlist    string `json:"playlist"`
+	Visibility  string `json:"visibility"`
+	Location    string `json:"location"`
+	Userid      string `json:"userid"`
 }
 
 type NewUser struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Profilepic string `json:"profilepic"`
+	Premium    string `json:"premium"`
 }
 
 type NewVideo struct {
-	URL    string `json:"url"`
-	Title  string `json:"title"`
-	UserID string `json:"userID"`
+	URL         string `json:"url"`
+	Title       string `json:"title"`
+	Thumbnail   string `json:"thumbnail"`
+	Restriction string `json:"restriction"`
+	Playlist    string `json:"playlist"`
+	Visibility  string `json:"visibility"`
+	Location    string `json:"location"`
+	UserID      string `json:"userID"`
 }
