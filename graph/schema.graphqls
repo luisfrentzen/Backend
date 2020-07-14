@@ -10,6 +10,11 @@ type Video {
   id: ID!
   url: String!
   title: String!
+  thumbnail: String!
+  restriction: String!
+  playlist: String!
+  visibility: String!
+  location: String!
   userid: String!
 }
 
@@ -27,6 +32,11 @@ input newUser {
 input newVideo {
   url: String!
   title: String!
+  thumbnail: String!
+  restriction: String!
+  playlist: String!
+  visibility: String!
+  location: String!
   userID: String!
 }
 
