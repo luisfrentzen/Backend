@@ -25,6 +25,7 @@ func main() {
 		AllowedOrigins:   []string{"http://localhost:4200","https://vast-falls-58623.herokuapp.com"},
 		AllowCredentials: true,
 		Debug:            true,
+		OptionsPassthrough: true,
 	}).Handler)
 	//db := pg.Connect(&pg.Options{
 	//	Addr:     "ec2-52-200-48-116.compute-1.amazonaws.com:5432",
