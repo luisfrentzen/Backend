@@ -88,6 +88,9 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 		Playlist:    input.Playlist,
 		Restriction: input.Restriction,
 		Category:    input.Category,
+		Like:        input.Like,
+		Disilike:    input.Disilike,
+		View:        input.View,
 	}
 
 	_, err := r.DB.Model(&video).Insert()

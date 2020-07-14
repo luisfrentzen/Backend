@@ -20,6 +20,9 @@ type Video {
   visibility: String!
   location: String!
   userid: String!
+  like: Int!
+  disilike: Int!
+  view: Int!
 }
 
 type Query {
@@ -46,6 +49,9 @@ input newVideo {
   visibility: String!
   location: String!
   userid: String!
+  like: Int!
+  disilike: Int!
+  view: Int!
 }
 
 type Mutation {

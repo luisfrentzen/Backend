@@ -21,6 +21,9 @@ type Video struct {
 	Visibility  string `json:"visibility"`
 	Location    string `json:"location"`
 	Userid      string `json:"userid"`
+	Like        int    `json:"like"`
+	Disilike    int    `json:"disilike"`
+	View        int    `json:"view"`
 }
 
 type NewUser struct {
@@ -41,4 +44,7 @@ type NewVideo struct {
 	Visibility  string `json:"visibility"`
 	Location    string `json:"location"`
 	Userid      string `json:"userid"`
+	Like        int    `json:"like"`
+	Disilike    int    `json:"disilike"`
+	View        int    `json:"view"`
 }

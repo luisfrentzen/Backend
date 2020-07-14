@@ -68,7 +68,9 @@ type ComplexityRoot struct {
 	Video struct {
 		Category    func(childComplexity int) int
 		Desc        func(childComplexity int) int
+		Disilike    func(childComplexity int) int
 		ID          func(childComplexity int) int
+		Like        func(childComplexity int) int
 		Location    func(childComplexity int) int
 		Playlist    func(childComplexity int) int
 		Restriction func(childComplexity int) int
@@ -76,6 +78,7 @@ type ComplexityRoot struct {
 		Title       func(childComplexity int) int
 		URL         func(childComplexity int) int
 		Userid      func(childComplexity int) int
+		View        func(childComplexity int) int
 		Visibility  func(childComplexity int) int
 	}
 }
@@ -249,12 +252,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Video.Desc(childComplexity), true
 
+	case "Video.disilike":
+		if e.complexity.Video.Disilike == nil {
+			break
+		}
+
+		return e.complexity.Video.Disilike(childComplexity), true
+
 	case "Video.id":
 		if e.complexity.Video.ID == nil {
 			break
 		}
 
 		return e.complexity.Video.ID(childComplexity), true
+
+	case "Video.like":
+		if e.complexity.Video.Like == nil {
+			break
+		}
+
+		return e.complexity.Video.Like(childComplexity), true
 
 	case "Video.location":
 		if e.complexity.Video.Location == nil {
@@ -304,6 +321,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Video.Userid(childComplexity), true
+
+	case "Video.view":
+		if e.complexity.Video.View == nil {
+			break
+		}
+
+		return e.complexity.Video.View(childComplexity), true
 
 	case "Video.visibility":
 		if e.complexity.Video.Visibility == nil {
@@ -398,6 +422,9 @@ type Video {
   visibility: String!
   location: String!
   userid: String!
+  like: Int!
+  disilike: Int!
+  view: Int!
 }
 
 type Query {
@@ -424,6 +451,9 @@ input newVideo {
   visibility: String!
   location: String!
   userid: String!
+  like: Int!
+  disilike: Int!
+  view: Int!
 }
 
 type Mutation {
@@ -1539,6 +1569,108 @@ func (ec *executionContext) _Video_userid(ctx context.Context, field graphql.Col
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Video_like(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Video",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Like, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Video_disilike(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Video",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Disilike, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Video_view(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Video",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.View, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -2698,6 +2830,24 @@ func (ec *executionContext) unmarshalInputnewVideo(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
+		case "like":
+			var err error
+			it.Like, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "disilike":
+			var err error
+			it.Disilike, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "view":
+			var err error
+			it.View, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -2945,6 +3095,21 @@ func (ec *executionContext) _Video(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "userid":
 			out.Values[i] = ec._Video_userid(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "like":
+			out.Values[i] = ec._Video_like(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "disilike":
+			out.Values[i] = ec._Video_disilike(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "view":
+			out.Values[i] = ec._Video_view(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3224,6 +3389,20 @@ func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface
 
 func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	return graphql.UnmarshalInt(v)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
