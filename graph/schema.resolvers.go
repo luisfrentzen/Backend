@@ -25,6 +25,8 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser)
 	if err != nil {
 		//fmt.Println(err)
 		return nil, errors.New("Insert new user failed")
+	} else {
+		log.Println("Create User Succeed")
 	}
 
 	return &user, nil
@@ -100,6 +102,8 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 	if err != nil {
 		fmt.Println(err)
 		return nil, errors.New("Insert new video failed")
+	} else {
+		log.Println("Create Video Succeed")
 	}
 
 	return &video, nil
@@ -151,6 +155,8 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 
 	if err != nil {
 		return nil, errors.New("Failed to query users")
+	} else {
+		log.Println("Get Users Succeed")
 	}
 
 	return users, nil
@@ -188,6 +194,8 @@ func (r *queryResolver) UserByID(ctx context.Context, userid string) ([]*model.U
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("Failed to query user")
+	} else {
+		log.Println("Get User By Id Succeed")
 	}
 
 	return user, nil
