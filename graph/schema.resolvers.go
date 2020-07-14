@@ -8,7 +8,6 @@ import (
 	"Backend/graph/model"
 	"context"
 	"errors"
-	"fmt"
 	"log"
 )
 
@@ -80,7 +79,7 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 	fkErr := r.DB.Model(&user).Where("id = ?", input.Userid).First()
 
 	if fkErr != nil {
-		fmt.Println(fkErr)
+		log.Println(fkErr)
 		return nil, errors.New("User not found")
 	}
 
@@ -103,7 +102,7 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 	_, err := r.DB.Model(&video).Insert()
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return nil, errors.New("Insert new video failed")
 	} else {
 		log.Println("Create Video Succeed")
