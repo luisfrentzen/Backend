@@ -25,6 +25,9 @@ type Video {
   view: Int!
   channelpic: String!
   channelname: String!
+  day: Int!
+  month: Int!
+  year: Int!
 }
 
 type Query {
@@ -57,7 +60,9 @@ input newVideo {
   view: Int!
   channelpic: String!
   channelname: String!
-
+  day: Int!
+  month: Int!
+  year: Int!
 }
 
 type Mutation {

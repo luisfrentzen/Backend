@@ -96,8 +96,11 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 		Like:        input.Like,
 		Disilike:    input.Disilike,
 		View:        input.View,
-		Channelpic: input.Channelpic,
+		Channelpic:  input.Channelpic,
 		Channelname: input.Channelname,
+		Day: input.Day,
+		Month: input.Month,
+		Year: input.Year,
 	}
 
 	_, err := r.DB.Model(&video).Insert()
