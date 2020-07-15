@@ -68,6 +68,8 @@ type ComplexityRoot struct {
 
 	Video struct {
 		Category    func(childComplexity int) int
+		Channelname func(childComplexity int) int
+		Channelpic  func(childComplexity int) int
 		Desc        func(childComplexity int) int
 		Disilike    func(childComplexity int) int
 		ID          func(childComplexity int) int
@@ -259,6 +261,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Video.Category(childComplexity), true
 
+	case "Video.channelname":
+		if e.complexity.Video.Channelname == nil {
+			break
+		}
+
+		return e.complexity.Video.Channelname(childComplexity), true
+
+	case "Video.channelpic":
+		if e.complexity.Video.Channelpic == nil {
+			break
+		}
+
+		return e.complexity.Video.Channelpic(childComplexity), true
+
 	case "Video.desc":
 		if e.complexity.Video.Desc == nil {
 			break
@@ -439,6 +455,8 @@ type Video {
   like: Int!
   disilike: Int!
   view: Int!
+  channelpic: String!
+  channelname: String!
 }
 
 type Query {
@@ -469,6 +487,9 @@ input newVideo {
   like: Int!
   disilike: Int!
   view: Int!
+  channelpic: String!
+  channelname: String!
+
 }
 
 type Mutation {
@@ -1743,6 +1764,74 @@ func (ec *executionContext) _Video_view(ctx context.Context, field graphql.Colle
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Video_channelpic(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Video",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Channelpic, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Video_channelname(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Video",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Channelname, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2918,6 +3007,18 @@ func (ec *executionContext) unmarshalInputnewVideo(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
+		case "channelpic":
+			var err error
+			it.Channelpic, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "channelname":
+			var err error
+			it.Channelname, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -3194,6 +3295,16 @@ func (ec *executionContext) _Video(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "view":
 			out.Values[i] = ec._Video_view(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "channelpic":
+			out.Values[i] = ec._Video_channelpic(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "channelname":
+			out.Values[i] = ec._Video_channelname(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

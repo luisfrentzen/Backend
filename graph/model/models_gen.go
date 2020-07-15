@@ -24,6 +24,8 @@ type Video struct {
 	Like        int    `json:"like"`
 	Disilike    int    `json:"disilike"`
 	View        int    `json:"view"`
+	Channelpic  string `json:"channelpic"`
+	Channelname string `json:"channelname"`
 }
 
 type NewUser struct {
@@ -47,4 +49,6 @@ type NewVideo struct {
 	Like        int    `json:"like"`
 	Disilike    int    `json:"disilike"`
 	View        int    `json:"view"`
+	Channelpic  string `json:"channelpic"`
+	Channelname string `json:"channelname"`
 }

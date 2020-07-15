@@ -23,7 +23,6 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser)
 
 	_, err := r.DB.Model(&user).Insert()
 
-
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("Insert new user failed")
@@ -97,6 +96,8 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 		Like:        input.Like,
 		Disilike:    input.Disilike,
 		View:        input.View,
+		Channelpic: input.Channelpic,
+		Channelname: input.Channelname,
 	}
 
 	_, err := r.DB.Model(&video).Insert()
@@ -211,10 +212,3 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.

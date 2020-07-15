@@ -23,6 +23,8 @@ type Video {
   like: Int!
   disilike: Int!
   view: Int!
+  channelpic: String!
+  channelname: String!
 }
 
 type Query {
@@ -53,6 +55,9 @@ input newVideo {
   like: Int!
   disilike: Int!
   view: Int!
+  channelpic: String!
+  channelname: String!
+
 }
 
 type Mutation {
