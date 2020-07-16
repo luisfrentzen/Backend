@@ -8,7 +8,6 @@ import (
 	"Backend/graph/model"
 	"context"
 	"errors"
-	"fmt"
 	"log"
 )
 
@@ -221,7 +220,17 @@ func (r *queryResolver) UserByID(ctx context.Context, userid string) ([]*model.U
 }
 
 func (r *queryResolver) VideoByID(ctx context.Context, id int) ([]*model.Video, error) {
-	panic(fmt.Errorf("not implemented"))
+	var video []*model.Video
+
+	err := r.DB.Model(&video).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Failed to query video")
+	} else {
+		log.Println("Get Video By Id Succeed")
+	}
+	return video, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
