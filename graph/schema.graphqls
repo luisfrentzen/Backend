@@ -34,6 +34,7 @@ type Query {
   users: [User!]!
   videos: [Video!]!
   videosByUser(userid: String!): [Video!]!
+  videosByCategory(category: String!): [Video!]!
   userById(userid: String!): [User!]!
 }
 

@@ -98,9 +98,9 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 		View:        input.View,
 		Channelpic:  input.Channelpic,
 		Channelname: input.Channelname,
-		Day: input.Day,
-		Month: input.Month,
-		Year: input.Year,
+		Day:         input.Day,
+		Month:       input.Month,
+		Year:        input.Year,
 	}
 
 	_, err := r.DB.Model(&video).Insert()
@@ -184,6 +184,18 @@ func (r *queryResolver) VideosByUser(ctx context.Context, userid string) ([]*mod
 	var videos []*model.Video
 
 	err := r.DB.Model(&videos).Where("userid = ?", userid).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query videos")
+	}
+
+	return videos, nil
+}
+
+func (r *queryResolver) VideosByCategory(ctx context.Context, category string) ([]*model.Video, error) {
+	var videos []*model.Video
+
+	err := r.DB.Model(&videos).Where("category = ?", category).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query videos")
