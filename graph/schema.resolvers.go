@@ -8,6 +8,7 @@ import (
 	"Backend/graph/model"
 	"context"
 	"errors"
+	"fmt"
 	"log"
 )
 
@@ -217,6 +218,10 @@ func (r *queryResolver) UserByID(ctx context.Context, userid string) ([]*model.U
 	}
 
 	return user, nil
+}
+
+func (r *queryResolver) VideoByID(ctx context.Context, id int) ([]*model.Video, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Mutation returns generated.MutationResolver implementation.
