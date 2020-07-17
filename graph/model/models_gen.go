@@ -12,7 +12,7 @@ type Playlist struct {
 	Year       int    `json:"year"`
 	View       int    `json:"view"`
 	Desc       string `json:"desc"`
-	Videos     []int  `json:"videos"`
+	Videos     string `json:"videos"`
 }
 
 type User struct {
@@ -53,7 +53,7 @@ type NewPlaylist struct {
 	Year       int    `json:"year"`
 	View       int    `json:"view"`
 	Desc       string `json:"desc"`
-	Videos     []int  `json:"videos"`
+	Videos     string `json:"videos"`
 }
 
 type NewUser struct {

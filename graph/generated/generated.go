@@ -644,7 +644,7 @@ type Playlist {
   year: Int!
   view: Int!
   desc: String!
-  videos: [Int!]!
+  videos: String!
 }
 
 type Query {
@@ -673,7 +673,7 @@ input newPlaylist {
   year: Int!
   view: Int!
   desc: String!
-  videos: [Int!]!
+  videos: String!
 }
 
 input newVideo {
@@ -1622,9 +1622,9 @@ func (ec *executionContext) _Playlist_videos(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]int)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNInt2ᚕintᚄ(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3855,7 +3855,7 @@ func (ec *executionContext) unmarshalInputnewPlaylist(ctx context.Context, obj i
 			}
 		case "videos":
 			var err error
-			it.Videos, err = ec.unmarshalNInt2ᚕintᚄ(ctx, v)
+			it.Videos, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4739,35 +4739,6 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNInt2ᚕintᚄ(ctx context.Context, v interface{}) ([]int, error) {
-	var vSlice []interface{}
-	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
-	}
-	var err error
-	res := make([]int, len(vSlice))
-	for i := range vSlice {
-		res[i], err = ec.unmarshalNInt2int(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalNInt2ᚕintᚄ(ctx context.Context, sel ast.SelectionSet, v []int) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalNInt2int(ctx, sel, v[i])
-	}
-
-	return ret
 }
 
 func (ec *executionContext) marshalNPlaylist2BackendᚋgraphᚋmodelᚐPlaylist(ctx context.Context, sel ast.SelectionSet, v model.Playlist) graphql.Marshaler {
