@@ -30,9 +30,23 @@ type Video {
   year: Int!
 }
 
+type Playlist {
+  id: ID!
+  title: String!
+  userid: String!
+  visibility: String!
+  day: Int!
+  month: Int!
+  year: Int!
+  view: Int!
+  desc: String!
+  videos: [Int!]!
+}
+
 type Query {
   users: [User!]!
   videos: [Video!]!
+  playlists: [Playlist!]!
   videosByUser(userid: String!): [Video!]!
   videosByCategory(category: String!): [Video!]!
   userById(userid: String!): [User!]!
@@ -44,6 +58,18 @@ input newUser {
   name: String!
   profilepic: String!
   premium: String!
+}
+
+input newPlaylist {
+  title: String!
+  userid: String!
+  visibility: String!
+  day: Int!
+  month: Int!
+  year: Int!
+  view: Int!
+  desc: String!
+  videos: [Int!]!
 }
 
 input newVideo {
@@ -75,4 +101,7 @@ type Mutation {
   createVideo (input: newVideo): Video!
   updateVideo (id: ID!, input: newVideo): Video!
   deleteVideo (id: ID!): Boolean!
+
+  createPlaylist (input: newPlaylist): Playlist!
+  updatePlaylist (id: ID!, input: newPlaylist): Playlist!
 }

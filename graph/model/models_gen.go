@@ -2,6 +2,19 @@
 
 package model
 
+type Playlist struct {
+	ID         string `json:"id"`
+	Title      string `json:"title"`
+	Userid     string `json:"userid"`
+	Visibility string `json:"visibility"`
+	Day        int    `json:"day"`
+	Month      int    `json:"month"`
+	Year       int    `json:"year"`
+	View       int    `json:"view"`
+	Desc       string `json:"desc"`
+	Videos     []int  `json:"videos"`
+}
+
 type User struct {
 	ID         string `json:"id"`
 	Name       string `json:"name"`
@@ -29,6 +42,18 @@ type Video struct {
 	Day         int    `json:"day"`
 	Month       int    `json:"month"`
 	Year        int    `json:"year"`
+}
+
+type NewPlaylist struct {
+	Title      string `json:"title"`
+	Userid     string `json:"userid"`
+	Visibility string `json:"visibility"`
+	Day        int    `json:"day"`
+	Month      int    `json:"month"`
+	Year       int    `json:"year"`
+	View       int    `json:"view"`
+	Desc       string `json:"desc"`
+	Videos     []int  `json:"videos"`
 }
 
 type NewUser struct {

@@ -8,6 +8,7 @@ import (
 	"Backend/graph/model"
 	"context"
 	"errors"
+	"fmt"
 	"log"
 )
 
@@ -154,6 +155,35 @@ func (r *mutationResolver) DeleteVideo(ctx context.Context, id string) (bool, er
 	return true, nil
 }
 
+func (r *mutationResolver) CreatePlaylist(ctx context.Context, input *model.NewPlaylist) (*model.Playlist, error) {
+	playlist := model.Playlist{
+		Title:      input.Title,
+		Userid:     input.Userid,
+		Desc:       input.Desc,
+		Visibility: input.Visibility,
+		View:       input.View,
+		Day:        input.Day,
+		Month:      input.Month,
+		Year:       input.Year,
+		Videos:     input.Videos,
+	}
+
+	_, err := r.DB.Model(&playlist).Insert()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Insert new playlist failed")
+	} else {
+		log.Println("Create Playlist Succeed")
+	}
+
+	return &playlist, nil
+}
+
+func (r *mutationResolver) UpdatePlaylist(ctx context.Context, id string, input *model.NewPlaylist) (*model.Playlist, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	var users []*model.User
 
@@ -178,6 +208,19 @@ func (r *queryResolver) Videos(ctx context.Context) ([]*model.Video, error) {
 	}
 
 	return videos, nil
+}
+
+func (r *queryResolver) Playlists(ctx context.Context) ([]*model.Playlist, error) {
+	var playlists []*model.Playlist
+
+	err := r.DB.Model(&playlists).Order("id").Select()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Failed to query videos")
+	}
+
+	return playlists, nil
 }
 
 func (r *queryResolver) VideosByUser(ctx context.Context, userid string) ([]*model.Video, error) {
