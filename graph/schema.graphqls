@@ -52,6 +52,7 @@ type Query {
   videosByCategory(category: String!): [Video!]!
   userById(userid: String!): [User!]!
   videoById(id: Int!): [Video!]!
+  playlistById(id: Int!): [Playlist!]!
 }
 
 input newUser {
@@ -70,6 +71,10 @@ input newPlaylist {
   year: Int!
   view: Int!
   desc: String!
+  videos: String!
+}
+
+input addToPlaylist {
   videos: String!
 }
 
@@ -105,4 +110,5 @@ type Mutation {
 
   createPlaylist (input: newPlaylist): Playlist!
   updatePlaylist (id: ID!, input: newPlaylist): Playlist!
+  addToPlaylist (id: ID!, input: addToPlaylist): Playlist!
 }

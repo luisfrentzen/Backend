@@ -209,6 +209,32 @@ func (r *mutationResolver) UpdatePlaylist(ctx context.Context, id string, input 
 	return &playlist, nil
 }
 
+func (r *mutationResolver) AddToPlaylist(ctx context.Context, id string, input *model.AddToPlaylist) (*model.Playlist, error) {
+	var playlist model.Playlist
+
+	err := r.DB.Model(&playlist).Where("id = ?", id).First()
+
+	if err != nil {
+		return nil, errors.New("Playlist not found!")
+	}
+
+	if playlist.Videos == "" {
+		playlist.Videos = input.Videos
+	} else {
+		playlist.Videos += "," + input.Videos
+	}
+
+
+	_, updateErr := r.DB.Model(&playlist).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update playlist failed")
+	}
+
+	return &playlist, nil
+}
+
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	var users []*model.User
 
@@ -311,6 +337,18 @@ func (r *queryResolver) VideoByID(ctx context.Context, id int) ([]*model.Video, 
 		log.Println("Get Video By Id Succeed")
 	}
 	return video, nil
+}
+
+func (r *queryResolver) PlaylistByID(ctx context.Context, id int) ([]*model.Playlist, error) {
+	var playlists []*model.Playlist
+
+	err := r.DB.Model(&playlists).Where("id = ?", id).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query playlists")
+	}
+
+	return playlists, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

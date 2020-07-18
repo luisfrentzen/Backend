@@ -44,6 +44,7 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
+		AddToPlaylist  func(childComplexity int, id string, input *model.AddToPlaylist) int
 		CreatePlaylist func(childComplexity int, input *model.NewPlaylist) int
 		CreateUser     func(childComplexity int, input *model.NewUser) int
 		CreateVideo    func(childComplexity int, input *model.NewVideo) int
@@ -68,6 +69,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		PlaylistByID     func(childComplexity int, id int) int
 		Playlists        func(childComplexity int) int
 		PlaylistsByUser  func(childComplexity int, userid string) int
 		UserByID         func(childComplexity int, userid string) int
@@ -117,6 +119,7 @@ type MutationResolver interface {
 	DeleteVideo(ctx context.Context, id string) (bool, error)
 	CreatePlaylist(ctx context.Context, input *model.NewPlaylist) (*model.Playlist, error)
 	UpdatePlaylist(ctx context.Context, id string, input *model.NewPlaylist) (*model.Playlist, error)
+	AddToPlaylist(ctx context.Context, id string, input *model.AddToPlaylist) (*model.Playlist, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*model.User, error)
@@ -127,6 +130,7 @@ type QueryResolver interface {
 	VideosByCategory(ctx context.Context, category string) ([]*model.Video, error)
 	UserByID(ctx context.Context, userid string) ([]*model.User, error)
 	VideoByID(ctx context.Context, id int) ([]*model.Video, error)
+	PlaylistByID(ctx context.Context, id int) ([]*model.Playlist, error)
 }
 
 type executableSchema struct {
@@ -143,6 +147,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Mutation.addToPlaylist":
+		if e.complexity.Mutation.AddToPlaylist == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addToPlaylist_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddToPlaylist(childComplexity, args["id"].(string), args["input"].(*model.AddToPlaylist)), true
 
 	case "Mutation.createPlaylist":
 		if e.complexity.Mutation.CreatePlaylist == nil {
@@ -309,6 +325,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Playlist.Year(childComplexity), true
+
+	case "Query.playlistById":
+		if e.complexity.Query.PlaylistByID == nil {
+			break
+		}
+
+		args, err := ec.field_Query_playlistById_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.PlaylistByID(childComplexity, args["id"].(int)), true
 
 	case "Query.playlists":
 		if e.complexity.Query.Playlists == nil {
@@ -670,6 +698,7 @@ type Query {
   videosByCategory(category: String!): [Video!]!
   userById(userid: String!): [User!]!
   videoById(id: Int!): [Video!]!
+  playlistById(id: Int!): [Playlist!]!
 }
 
 input newUser {
@@ -688,6 +717,10 @@ input newPlaylist {
   year: Int!
   view: Int!
   desc: String!
+  videos: String!
+}
+
+input addToPlaylist {
   videos: String!
 }
 
@@ -723,6 +756,7 @@ type Mutation {
 
   createPlaylist (input: newPlaylist): Playlist!
   updatePlaylist (id: ID!, input: newPlaylist): Playlist!
+  addToPlaylist (id: ID!, input: addToPlaylist): Playlist!
 }
 `, BuiltIn: false},
 }
@@ -731,6 +765,28 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_addToPlaylist_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 *model.AddToPlaylist
+	if tmp, ok := rawArgs["input"]; ok {
+		arg1, err = ec.unmarshalOaddToPlaylist2ᚖBackendᚋgraphᚋmodelᚐAddToPlaylist(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg1
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createPlaylist_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -879,6 +935,20 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_playlistById_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -1300,6 +1370,47 @@ func (ec *executionContext) _Mutation_updatePlaylist(ctx context.Context, field 
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().UpdatePlaylist(rctx, args["id"].(string), args["input"].(*model.NewPlaylist))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Playlist)
+	fc.Result = res
+	return ec.marshalNPlaylist2ᚖBackendᚋgraphᚋmodelᚐPlaylist(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_addToPlaylist(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_addToPlaylist_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddToPlaylist(rctx, args["id"].(string), args["input"].(*model.AddToPlaylist))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1961,6 +2072,47 @@ func (ec *executionContext) _Query_videoById(ctx context.Context, field graphql.
 	res := resTmp.([]*model.Video)
 	fc.Result = res
 	return ec.marshalNVideo2ᚕᚖBackendᚋgraphᚋmodelᚐVideoᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_playlistById(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_playlistById_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().PlaylistByID(rctx, args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Playlist)
+	fc.Result = res
+	return ec.marshalNPlaylist2ᚕᚖBackendᚋgraphᚋmodelᚐPlaylistᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3869,6 +4021,24 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputaddToPlaylist(ctx context.Context, obj interface{}) (model.AddToPlaylist, error) {
+	var it model.AddToPlaylist
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "videos":
+			var err error
+			it.Videos, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputnewPlaylist(ctx context.Context, obj interface{}) (model.NewPlaylist, error) {
 	var it model.NewPlaylist
 	var asMap = obj.(map[string]interface{})
@@ -4154,6 +4324,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "addToPlaylist":
+			out.Values[i] = ec._Mutation_addToPlaylist(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4359,6 +4534,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_videoById(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "playlistById":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_playlistById(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -5444,6 +5633,18 @@ func (ec *executionContext) marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec.___Type(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOaddToPlaylist2BackendᚋgraphᚋmodelᚐAddToPlaylist(ctx context.Context, v interface{}) (model.AddToPlaylist, error) {
+	return ec.unmarshalInputaddToPlaylist(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOaddToPlaylist2ᚖBackendᚋgraphᚋmodelᚐAddToPlaylist(ctx context.Context, v interface{}) (*model.AddToPlaylist, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOaddToPlaylist2BackendᚋgraphᚋmodelᚐAddToPlaylist(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) unmarshalOnewPlaylist2BackendᚋgraphᚋmodelᚐNewPlaylist(ctx context.Context, v interface{}) (model.NewPlaylist, error) {

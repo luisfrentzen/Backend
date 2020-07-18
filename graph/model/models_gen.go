@@ -44,6 +44,10 @@ type Video struct {
 	Year        int    `json:"year"`
 }
 
+type AddToPlaylist struct {
+	Videos string `json:"videos"`
+}
+
 type NewPlaylist struct {
 	Title      string `json:"title"`
 	Userid     string `json:"userid"`
