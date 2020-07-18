@@ -214,6 +214,7 @@ func (r *mutationResolver) AddToPlaylist(ctx context.Context, id string, input *
 	err := r.DB.Model(&playlist).Where("id = ?", id).First()
 
 	if err != nil {
+		log.Println(err)
 		return nil, errors.New("Playlist not found!")
 	}
 
