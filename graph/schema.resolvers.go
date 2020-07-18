@@ -8,7 +8,6 @@ import (
 	"Backend/graph/model"
 	"context"
 	"errors"
-	"fmt"
 	"log"
 )
 
@@ -126,7 +125,10 @@ func (r *mutationResolver) UpdateVideo(ctx context.Context, id string, input *mo
 	}
 
 	video.Title = input.Title
-	video.URL = input.URL
+	video.Desc = input.Desc
+	video.View = input.View
+	video.Like = input.Like
+	video.Disilike = input.Disilike
 
 	_, updateErr := r.DB.Model(&video).Where("id = ?", id).Update()
 
@@ -181,7 +183,30 @@ func (r *mutationResolver) CreatePlaylist(ctx context.Context, input *model.NewP
 }
 
 func (r *mutationResolver) UpdatePlaylist(ctx context.Context, id string, input *model.NewPlaylist) (*model.Playlist, error) {
-	panic(fmt.Errorf("not implemented"))
+	var playlist model.Playlist
+
+	err := r.DB.Model(&playlist).Where("id = ?", id).First()
+
+	if err != nil {
+		return nil, errors.New("Playlist not found!")
+	}
+
+	playlist.Title = input.Title
+	playlist.Desc = input.Desc
+	playlist.Videos = input.Videos
+	playlist.Visibility = input.Visibility
+	playlist.Day = input.Day
+	playlist.Month = input.Month
+	playlist.Year = input.Year
+
+	_, updateErr := r.DB.Model(&playlist).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update playlist failed")
+	}
+
+	return &playlist, nil
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
