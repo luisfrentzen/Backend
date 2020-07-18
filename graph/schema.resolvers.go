@@ -8,7 +8,10 @@ import (
 	"Backend/graph/model"
 	"context"
 	"errors"
+	"github.com/go-pg/pg/v10"
 	"log"
+	"strconv"
+	"strings"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser) (*model.User, error) {
@@ -210,16 +213,16 @@ func (r *mutationResolver) UpdatePlaylist(ctx context.Context, id string, input 
 
 func (r *mutationResolver) AddToPlaylist(ctx context.Context, id string, input *model.AddToPlaylist) (*model.Playlist, error) {
 	var playlist model.Playlist
-	
+
 	log.Println("Updating")
-	
+
 	err := r.DB.Model(&playlist).Where("id = ?", id).First()
 
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("Playlist not found!")
 	}
-	
+
 	log.Println("Playlist Found")
 
 	if playlist.Videos == "" {
@@ -227,7 +230,7 @@ func (r *mutationResolver) AddToPlaylist(ctx context.Context, id string, input *
 	} else {
 		playlist.Videos += "," + input.Videos
 	}
-	
+
 	log.Println("Updated Videos")
 
 	_, updateErr := r.DB.Model(&playlist).Where("id = ?", id).Update()
@@ -236,7 +239,7 @@ func (r *mutationResolver) AddToPlaylist(ctx context.Context, id string, input *
 		log.Println(updateErr)
 		return nil, errors.New("Update playlist failed")
 	}
-	
+
 	log.Println("Update succeeded")
 
 	return &playlist, nil
@@ -358,6 +361,32 @@ func (r *queryResolver) PlaylistByID(ctx context.Context, id int) ([]*model.Play
 	return playlists, nil
 }
 
+func (r *queryResolver) VideosByIds(ctx context.Context, id string) ([]*model.Video, error) {
+	var videos []*model.Video
+
+	s := strings.Split(id, ",")
+	var idArr = []int64{}
+
+	for _, i := range s {
+		j, err := strconv.ParseInt(i, 10, 64)
+		if err != nil {
+			log.Println(err)
+		}
+
+		idArr = append(idArr, j)
+	}
+
+	_, err := r.DB.Query(&videos, `SELECT * FROM videos WHERE id IN (?)`, pg.Ints(idArr))
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Failed to query video")
+	} else {
+		log.Println("Get Video By Id Succeed")
+	}
+	return videos, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
@@ -366,3 +395,11 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+
