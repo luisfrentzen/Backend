@@ -210,19 +210,25 @@ func (r *mutationResolver) UpdatePlaylist(ctx context.Context, id string, input 
 
 func (r *mutationResolver) AddToPlaylist(ctx context.Context, id string, input *model.AddToPlaylist) (*model.Playlist, error) {
 	var playlist model.Playlist
-
+	
+	log.Println("Updating")
+	
 	err := r.DB.Model(&playlist).Where("id = ?", id).First()
 
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("Playlist not found!")
 	}
+	
+	log.Println("Playlist Found")
 
 	if playlist.Videos == "" {
 		playlist.Videos = input.Videos
 	} else {
 		playlist.Videos += "," + input.Videos
 	}
+	
+	log.Println("Updated Videos")
 
 	_, updateErr := r.DB.Model(&playlist).Where("id = ?", id).Update()
 
@@ -230,6 +236,8 @@ func (r *mutationResolver) AddToPlaylist(ctx context.Context, id string, input *
 		log.Println(updateErr)
 		return nil, errors.New("Update playlist failed")
 	}
+	
+	log.Println("Update succeeded")
 
 	return &playlist, nil
 }
