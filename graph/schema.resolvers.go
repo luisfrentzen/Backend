@@ -90,7 +90,6 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 		Location:    input.Location,
 		Visibility:  input.Visibility,
 		Thumbnail:   input.Thumbnail,
-		Playlist:    input.Playlist,
 		Restriction: input.Restriction,
 		Category:    input.Category,
 		Like:        input.Like,
@@ -223,7 +222,6 @@ func (r *mutationResolver) AddToPlaylist(ctx context.Context, id string, input *
 	} else {
 		playlist.Videos += "," + input.Videos
 	}
-
 
 	_, updateErr := r.DB.Model(&playlist).Where("id = ?", id).Update()
 

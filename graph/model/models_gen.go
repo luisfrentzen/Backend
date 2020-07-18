@@ -30,7 +30,6 @@ type Video struct {
 	Restriction string `json:"restriction"`
 	Desc        string `json:"desc"`
 	Category    string `json:"category"`
-	Playlist    string `json:"playlist"`
 	Visibility  string `json:"visibility"`
 	Location    string `json:"location"`
 	Userid      string `json:"userid"`
@@ -74,7 +73,6 @@ type NewVideo struct {
 	Restriction string `json:"restriction"`
 	Desc        string `json:"desc"`
 	Category    string `json:"category"`
-	Playlist    string `json:"playlist"`
 	Visibility  string `json:"visibility"`
 	Location    string `json:"location"`
 	Userid      string `json:"userid"`

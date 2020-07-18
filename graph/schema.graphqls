@@ -16,7 +16,6 @@ type Video {
   restriction: String!
   desc: String!
   category: String!
-  playlist: String!
   visibility: String!
   location: String!
   userid: String!
@@ -85,7 +84,6 @@ input newVideo {
   restriction: String!
   desc: String!
   category: String!
-  playlist: String!
   visibility: String!
   location: String!
   userid: String!
