@@ -69,6 +69,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Playlists        func(childComplexity int) int
+		PlaylistsByUser  func(childComplexity int, userid string) int
 		UserByID         func(childComplexity int, userid string) int
 		Users            func(childComplexity int) int
 		VideoByID        func(childComplexity int, id int) int
@@ -121,6 +122,7 @@ type QueryResolver interface {
 	Users(ctx context.Context) ([]*model.User, error)
 	Videos(ctx context.Context) ([]*model.Video, error)
 	Playlists(ctx context.Context) ([]*model.Playlist, error)
+	PlaylistsByUser(ctx context.Context, userid string) ([]*model.Playlist, error)
 	VideosByUser(ctx context.Context, userid string) ([]*model.Video, error)
 	VideosByCategory(ctx context.Context, category string) ([]*model.Video, error)
 	UserByID(ctx context.Context, userid string) ([]*model.User, error)
@@ -314,6 +316,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Playlists(childComplexity), true
+
+	case "Query.playlistsByUser":
+		if e.complexity.Query.PlaylistsByUser == nil {
+			break
+		}
+
+		args, err := ec.field_Query_playlistsByUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.PlaylistsByUser(childComplexity, args["userid"].(string)), true
 
 	case "Query.userById":
 		if e.complexity.Query.UserByID == nil {
@@ -651,6 +665,7 @@ type Query {
   users: [User!]!
   videos: [Video!]!
   playlists: [Playlist!]!
+  playlistsByUser(userid: String!): [Playlist!]!
   videosByUser(userid: String!): [Video!]!
   videosByCategory(category: String!): [Video!]!
   userById(userid: String!): [User!]!
@@ -864,6 +879,20 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_playlistsByUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userid"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userid"] = arg0
 	return args, nil
 }
 
@@ -1713,6 +1742,47 @@ func (ec *executionContext) _Query_playlists(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Playlists(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Playlist)
+	fc.Result = res
+	return ec.marshalNPlaylist2ᚕᚖBackendᚋgraphᚋmodelᚐPlaylistᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_playlistsByUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_playlistsByUser_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().PlaylistsByUser(rctx, args["userid"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4219,6 +4289,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_playlists(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "playlistsByUser":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_playlistsByUser(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

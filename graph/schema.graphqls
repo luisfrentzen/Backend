@@ -47,6 +47,7 @@ type Query {
   users: [User!]!
   videos: [Video!]!
   playlists: [Playlist!]!
+  playlistsByUser(userid: String!): [Playlist!]!
   videosByUser(userid: String!): [Video!]!
   videosByCategory(category: String!): [Video!]!
   userById(userid: String!): [User!]!

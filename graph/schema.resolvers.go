@@ -248,6 +248,18 @@ func (r *queryResolver) Playlists(ctx context.Context) ([]*model.Playlist, error
 	return playlists, nil
 }
 
+func (r *queryResolver) PlaylistsByUser(ctx context.Context, userid string) ([]*model.Playlist, error) {
+	var playlists []*model.Playlist
+
+	err := r.DB.Model(&playlists).Where("userid = ?", userid).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query playlists")
+	}
+
+	return playlists, nil
+}
+
 func (r *queryResolver) VideosByUser(ctx context.Context, userid string) ([]*model.Video, error) {
 	var videos []*model.Video
 
