@@ -8,6 +8,7 @@ import (
 	"Backend/graph/model"
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -302,6 +303,95 @@ func (r *mutationResolver) AddToPlaylist(ctx context.Context, id string, input *
 	return &playlist, nil
 }
 
+func (r *mutationResolver) Subscribe(ctx context.Context, id string, chnid string) (*model.User, error) {
+	var user model.User
+
+	log.Println("Getting User")
+
+	err := r.DB.Model(&user).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	var channel model.User
+
+	log.Println("Getting Channel")
+
+	err2 := r.DB.Model(&channel).Where("id = ?", chnid).First()
+
+	if err2 != nil {
+		log.Println(err2)
+		return nil, errors.New("Channel not found!")
+	}
+
+	s := strings.Split(user.Subscribed, ",")
+
+	if s[0] == "" {
+		user.Subscribed = chnid
+
+		channel.Subscribers = channel.Subscribers + 1
+	} else {
+		var subscribed = false
+
+		for idx, i := range s {
+			if i == chnid {
+				//log.Println(len(s))
+				if len(s) == 1{
+					s = nil
+				} else {
+					s = append(s[:idx], s[idx+1:]...)
+				}
+
+				channel.Subscribers = channel.Subscribers - 1
+				subscribed = true
+				break
+			}
+		}
+
+		if subscribed == false {
+			s = append(s, chnid)
+			channel.Subscribers = channel.Subscribers + 1
+		}
+
+		user.Subscribed = strings.Join(s, ",")
+
+	}
+
+	_, updateErr := r.DB.Model(&user).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
+	}
+
+	_, updateErr2 := r.DB.Model(&channel).Where("id = ?", chnid).Update()
+
+	if updateErr2 != nil {
+		log.Println(updateErr2)
+		return nil, errors.New("Update channel failed")
+	}
+
+	return &user, nil
+}
+
+func (r *mutationResolver) Likevid(ctx context.Context, id string, chnid string) (*model.User, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) Disilikevid(ctx context.Context, id string, chnid string) (*model.User, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) Likecom(ctx context.Context, id string, chnid string) (*model.User, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) Disilikecom(ctx context.Context, id string, chnid string) (*model.User, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	var users []*model.User
 
@@ -502,3 +592,10 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.

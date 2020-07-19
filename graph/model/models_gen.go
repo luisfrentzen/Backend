@@ -30,10 +30,16 @@ type Playlist struct {
 }
 
 type User struct {
-	ID         string `json:"id"`
-	Name       string `json:"name"`
-	Profilepic string `json:"profilepic"`
-	Premium    string `json:"premium"`
+	ID                string `json:"id"`
+	Name              string `json:"name"`
+	Profilepic        string `json:"profilepic"`
+	Premium           string `json:"premium"`
+	Likedvideos       string `json:"likedvideos"`
+	Disilikedvideos   string `json:"disilikedvideos"`
+	Likedcomments     string `json:"likedcomments"`
+	Disilikedcomments string `json:"disilikedcomments"`
+	Subscribed        string `json:"subscribed"`
+	Subscribers       int    `json:"subscribers"`
 }
 
 type Video struct {
@@ -87,10 +93,16 @@ type NewPlaylist struct {
 }
 
 type NewUser struct {
-	ID         string `json:"id"`
-	Name       string `json:"name"`
-	Profilepic string `json:"profilepic"`
-	Premium    string `json:"premium"`
+	ID                string `json:"id"`
+	Name              string `json:"name"`
+	Profilepic        string `json:"profilepic"`
+	Premium           string `json:"premium"`
+	Likedvideos       string `json:"likedvideos"`
+	Disilikedvideos   string `json:"disilikedvideos"`
+	Likedcomments     string `json:"likedcomments"`
+	Disilikedcomments string `json:"disilikedcomments"`
+	Subscribed        string `json:"subscribed"`
+	Subscribers       int    `json:"subscribers"`
 }
 
 type NewVideo struct {

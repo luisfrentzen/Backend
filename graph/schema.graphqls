@@ -6,6 +6,12 @@ type User {
   name: String!
   profilepic: String!
   premium: String!
+  likedvideos: String!
+  disilikedvideos: String!
+  likedcomments: String!
+  disilikedcomments: String!
+  subscribed: String!
+  subscribers: Int!
 }
 
 type Video {
@@ -91,6 +97,12 @@ input newUser {
   name: String!
   profilepic: String!
   premium: String!
+  likedvideos: String!
+  disilikedvideos: String!
+  likedcomments: String!
+  disilikedcomments: String!
+  subscribed: String!
+  subscribers: Int!
 }
 
 input newPlaylist {
@@ -143,4 +155,10 @@ type Mutation {
   createPlaylist (input: newPlaylist): Playlist!
   updatePlaylist (id: ID!, input: newPlaylist): Playlist!
   addToPlaylist (id: ID!, input: addToPlaylist): Playlist!
+
+  subscribe (id: String!, chnid: String!): User!
+  likevid (id: String!, chnid: String!): User!
+  disilikevid (id: String!, chnid: String!): User!
+  likecom (id: String!, chnid: String!): User!
+  disilikecom (id: String!, chnid: String!): User!
 }
