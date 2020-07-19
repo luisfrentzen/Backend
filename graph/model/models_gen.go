@@ -2,6 +2,19 @@
 
 package model
 
+type Comment struct {
+	ID       string `json:"id"`
+	Userid   string `json:"userid"`
+	Like     int    `json:"like"`
+	Disilike int    `json:"disilike"`
+	Replyto  int    `json:"replyto"`
+	Desc     string `json:"desc"`
+	Videoid  int    `json:"videoid"`
+	Day      int    `json:"day"`
+	Month    int    `json:"month"`
+	Year     int    `json:"year"`
+}
+
 type Playlist struct {
 	ID         string `json:"id"`
 	Title      string `json:"title"`
@@ -45,6 +58,18 @@ type Video struct {
 
 type AddToPlaylist struct {
 	Videos string `json:"videos"`
+}
+
+type NewComment struct {
+	Userid   string `json:"userid"`
+	Like     int    `json:"like"`
+	Disilike int    `json:"disilike"`
+	Replyto  int    `json:"replyto"`
+	Desc     string `json:"desc"`
+	Videoid  int    `json:"videoid"`
+	Day      int    `json:"day"`
+	Month    int    `json:"month"`
+	Year     int    `json:"year"`
 }
 
 type NewPlaylist struct {

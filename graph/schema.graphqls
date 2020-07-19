@@ -42,9 +42,37 @@ type Playlist {
   videos: String!
 }
 
+type Comment {
+  id: ID!
+  userid: String!
+  like: Int!
+  disilike: Int!
+  replyto: Int!
+  desc: String!
+  videoid: Int!
+  day: Int!
+  month: Int!
+  year: Int!
+}
+
+input newComment {
+  userid: String!
+  like: Int!
+  disilike: Int!
+  replyto: Int!
+  desc: String!
+  videoid: Int!
+  day: Int!
+  month: Int!
+  year: Int!
+}
+
 type Query {
   users: [User!]!
   videos: [Video!]!
+  comments: [Comment!]!
+  commentsByVideo(videoid: Int!): [Comment!]!
+  replies(replyto: Int!): [Comment!]!
   playlists: [Playlist!]!
   playlistsByUser(userid: String!): [Playlist!]!
   videosByUser(userid: String!): [Video!]!
@@ -106,6 +134,8 @@ type Mutation {
   createVideo (input: newVideo): Video!
   updateVideo (id: ID!, input: newVideo): Video!
   deleteVideo (id: ID!): Boolean!
+
+  createComment (input: newComment): Comment!
 
   createPlaylist (input: newPlaylist): Playlist!
   updatePlaylist (id: ID!, input: newPlaylist): Playlist!

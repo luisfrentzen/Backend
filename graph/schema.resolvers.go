@@ -8,10 +8,11 @@ import (
 	"Backend/graph/model"
 	"context"
 	"errors"
-	"github.com/go-pg/pg/v10"
 	"log"
 	"strconv"
 	"strings"
+
+	pg "github.com/go-pg/pg/v10"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser) (*model.User, error) {
@@ -159,6 +160,31 @@ func (r *mutationResolver) DeleteVideo(ctx context.Context, id string) (bool, er
 	return true, nil
 }
 
+func (r *mutationResolver) CreateComment(ctx context.Context, input *model.NewComment) (*model.Comment, error) {
+	comment := model.Comment{
+		Videoid:      input.Videoid,
+		Userid:     input.Userid,
+		Replyto: input.Replyto,
+		Like: input.Like,
+		Disilike: input.Disilike,
+		Desc:       input.Desc,
+		Day:        input.Day,
+		Month:      input.Month,
+		Year:       input.Year,
+	}
+
+	_, err := r.DB.Model(&comment).Insert()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Insert new comment failed")
+	} else {
+		log.Println("Create Comment Succeed")
+	}
+
+	return &comment, nil
+}
+
 func (r *mutationResolver) CreatePlaylist(ctx context.Context, input *model.NewPlaylist) (*model.Playlist, error) {
 	playlist := model.Playlist{
 		Title:      input.Title,
@@ -269,6 +295,44 @@ func (r *queryResolver) Videos(ctx context.Context) ([]*model.Video, error) {
 	}
 
 	return videos, nil
+}
+
+func (r *queryResolver) Comments(ctx context.Context) ([]*model.Comment, error) {
+	var comments []*model.Comment
+
+	err := r.DB.Model(&comments).Order("id").Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query videos")
+	}
+
+	return comments, nil
+}
+
+func (r *queryResolver) CommentsByVideo(ctx context.Context, videoid int) ([]*model.Comment, error) {
+	var comments []*model.Comment
+
+	err := r.DB.Model(&comments).Where("videoid = ?", videoid).Select()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Failed to query playlists")
+	}
+
+	return comments, nil
+}
+
+func (r *queryResolver) Replies(ctx context.Context, replyto int) ([]*model.Comment, error) {
+	var comments []*model.Comment
+
+	err := r.DB.Model(&comments).Where("replyto = ?", replyto).Select()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Failed to query playlists")
+	}
+
+	return comments, nil
 }
 
 func (r *queryResolver) Playlists(ctx context.Context) ([]*model.Playlist, error) {
@@ -395,11 +459,3 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-
