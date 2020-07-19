@@ -83,6 +83,7 @@ type Query {
   videoById(id: Int!): [Video!]!
   playlistById(id: Int!): [Playlist!]!
   videosByIds(id: String!): [Video!]!
+  commentById(id: Int!): [Comment!]!
 }
 
 input newUser {

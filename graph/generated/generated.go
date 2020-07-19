@@ -84,6 +84,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		CommentByID      func(childComplexity int, id int) int
 		Comments         func(childComplexity int) int
 		CommentsByVideo  func(childComplexity int, videoid int) int
 		PlaylistByID     func(childComplexity int, id int) int
@@ -154,6 +155,7 @@ type QueryResolver interface {
 	VideoByID(ctx context.Context, id int) ([]*model.Video, error)
 	PlaylistByID(ctx context.Context, id int) ([]*model.Playlist, error)
 	VideosByIds(ctx context.Context, id string) ([]*model.Video, error)
+	CommentByID(ctx context.Context, id int) ([]*model.Comment, error)
 }
 
 type executableSchema struct {
@@ -437,6 +439,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Playlist.Year(childComplexity), true
+
+	case "Query.commentById":
+		if e.complexity.Query.CommentByID == nil {
+			break
+		}
+
+		args, err := ec.field_Query_commentById_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CommentByID(childComplexity, args["id"].(int)), true
 
 	case "Query.comments":
 		if e.complexity.Query.Comments == nil {
@@ -877,6 +891,7 @@ type Query {
   videoById(id: Int!): [Video!]!
   playlistById(id: Int!): [Playlist!]!
   videosByIds(id: String!): [Video!]!
+  commentById(id: Int!): [Comment!]!
 }
 
 input newUser {
@@ -1128,6 +1143,20 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_commentById_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -2920,6 +2949,47 @@ func (ec *executionContext) _Query_videosByIds(ctx context.Context, field graphq
 	res := resTmp.([]*model.Video)
 	fc.Result = res
 	return ec.marshalNVideo2ᚕᚖBackendᚋgraphᚋmodelᚐVideoᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_commentById(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_commentById_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CommentByID(rctx, args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Comment)
+	fc.Result = res
+	return ec.marshalNComment2ᚕᚖBackendᚋgraphᚋmodelᚐCommentᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5525,6 +5595,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_videosByIds(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "commentById":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_commentById(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

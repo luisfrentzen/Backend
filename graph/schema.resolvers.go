@@ -482,6 +482,18 @@ func (r *queryResolver) VideosByIds(ctx context.Context, id string) ([]*model.Vi
 	return videos, nil
 }
 
+func (r *queryResolver) CommentByID(ctx context.Context, id int) ([]*model.Comment, error) {
+	var comments []*model.Comment
+
+	err := r.DB.Model(&comments).Where("id = ?", id).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query comment")
+	}
+
+	return comments, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
