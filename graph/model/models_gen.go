@@ -3,16 +3,17 @@
 package model
 
 type Comment struct {
-	ID       string `json:"id"`
-	Userid   string `json:"userid"`
-	Like     int    `json:"like"`
-	Disilike int    `json:"disilike"`
-	Replyto  int    `json:"replyto"`
-	Desc     string `json:"desc"`
-	Videoid  int    `json:"videoid"`
-	Day      int    `json:"day"`
-	Month    int    `json:"month"`
-	Year     int    `json:"year"`
+	ID         string `json:"id"`
+	Userid     string `json:"userid"`
+	Like       int    `json:"like"`
+	Disilike   int    `json:"disilike"`
+	Replyto    int    `json:"replyto"`
+	Desc       string `json:"desc"`
+	Videoid    int    `json:"videoid"`
+	Day        int    `json:"day"`
+	Month      int    `json:"month"`
+	Year       int    `json:"year"`
+	Replycount int    `json:"replycount"`
 }
 
 type Playlist struct {
@@ -61,15 +62,16 @@ type AddToPlaylist struct {
 }
 
 type NewComment struct {
-	Userid   string `json:"userid"`
-	Like     int    `json:"like"`
-	Disilike int    `json:"disilike"`
-	Replyto  int    `json:"replyto"`
-	Desc     string `json:"desc"`
-	Videoid  int    `json:"videoid"`
-	Day      int    `json:"day"`
-	Month    int    `json:"month"`
-	Year     int    `json:"year"`
+	Userid    string `json:"userid"`
+	Like      int    `json:"like"`
+	Disilike  int    `json:"disilike"`
+	Replyto   int    `json:"replyto"`
+	Desc      string `json:"desc"`
+	Videoid   int    `json:"videoid"`
+	Day       int    `json:"day"`
+	Month     int    `json:"month"`
+	Year      int    `json:"year"`
+	Replyount int    `json:"replyount"`
 }
 
 type NewPlaylist struct {

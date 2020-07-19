@@ -44,16 +44,17 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Comment struct {
-		Day      func(childComplexity int) int
-		Desc     func(childComplexity int) int
-		Disilike func(childComplexity int) int
-		ID       func(childComplexity int) int
-		Like     func(childComplexity int) int
-		Month    func(childComplexity int) int
-		Replyto  func(childComplexity int) int
-		Userid   func(childComplexity int) int
-		Videoid  func(childComplexity int) int
-		Year     func(childComplexity int) int
+		Day        func(childComplexity int) int
+		Desc       func(childComplexity int) int
+		Disilike   func(childComplexity int) int
+		ID         func(childComplexity int) int
+		Like       func(childComplexity int) int
+		Month      func(childComplexity int) int
+		Replycount func(childComplexity int) int
+		Replyto    func(childComplexity int) int
+		Userid     func(childComplexity int) int
+		Videoid    func(childComplexity int) int
+		Year       func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -211,6 +212,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Comment.Month(childComplexity), true
+
+	case "Comment.replycount":
+		if e.complexity.Comment.Replycount == nil {
+			break
+		}
+
+		return e.complexity.Comment.Replycount(childComplexity), true
 
 	case "Comment.replyto":
 		if e.complexity.Comment.Replyto == nil {
@@ -839,6 +847,7 @@ type Comment {
   day: Int!
   month: Int!
   year: Int!
+  replycount: Int!
 }
 
 input newComment {
@@ -851,6 +860,7 @@ input newComment {
   day: Int!
   month: Int!
   year: Int!
+  replyount: Int!
 }
 
 type Query {
@@ -1607,6 +1617,40 @@ func (ec *executionContext) _Comment_year(ctx context.Context, field graphql.Col
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Year, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Comment_replycount(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Comment",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Replycount, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4828,6 +4872,12 @@ func (ec *executionContext) unmarshalInputnewComment(ctx context.Context, obj in
 			if err != nil {
 				return it, err
 			}
+		case "replyount":
+			var err error
+			it.Replyount, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -5116,6 +5166,11 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "year":
 			out.Values[i] = ec._Comment_year(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "replycount":
+			out.Values[i] = ec._Comment_replycount(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
