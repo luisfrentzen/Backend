@@ -183,6 +183,36 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input *model.NewCo
 		log.Println("Create Comment Succeed")
 	}
 
+	if input.Videoid == 0 {
+		var rootComment model.Comment
+
+		log.Println("Getting comment")
+
+		err := r.DB.Model(&rootComment).Where("id = ?", input.Replyto).First()
+
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("Failed to query video")
+		} else {
+			log.Println("Query Succeed")
+		}
+
+		log.Println("Adding reply count")
+
+		rootComment.Replycount = rootComment.Replycount + 1
+
+		log.Println("Updating comment")
+
+		_, updateErr := r.DB.Model(&rootComment).Where("id = ?", input.Replyto).Update()
+
+		if updateErr != nil {
+			log.Println(updateErr)
+			return nil, errors.New("Update failed")
+		} else {
+			log.Printf("Update succeed")
+		}
+	}
+
 	return &comment, nil
 }
 
