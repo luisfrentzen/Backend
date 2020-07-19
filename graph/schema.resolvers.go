@@ -162,16 +162,16 @@ func (r *mutationResolver) DeleteVideo(ctx context.Context, id string) (bool, er
 
 func (r *mutationResolver) CreateComment(ctx context.Context, input *model.NewComment) (*model.Comment, error) {
 	comment := model.Comment{
-		Videoid:  input.Videoid,
-		Userid:   input.Userid,
-		Replyto:  input.Replyto,
-		Like:     input.Like,
-		Disilike: input.Disilike,
-		Desc:     input.Desc,
-		Day:      input.Day,
-		Month:    input.Month,
-		Year:     input.Year,
-		Replycount: input.Replyount,
+		Videoid:    input.Videoid,
+		Userid:     input.Userid,
+		Replyto:    input.Replyto,
+		Like:       input.Like,
+		Disilike:   input.Disilike,
+		Desc:       input.Desc,
+		Day:        input.Day,
+		Month:      input.Month,
+		Year:       input.Year,
+		Replycount: input.Replycount,
 	}
 
 	_, err := r.DB.Model(&comment).Insert()

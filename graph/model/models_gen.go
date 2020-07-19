@@ -62,16 +62,16 @@ type AddToPlaylist struct {
 }
 
 type NewComment struct {
-	Userid    string `json:"userid"`
-	Like      int    `json:"like"`
-	Disilike  int    `json:"disilike"`
-	Replyto   int    `json:"replyto"`
-	Desc      string `json:"desc"`
-	Videoid   int    `json:"videoid"`
-	Day       int    `json:"day"`
-	Month     int    `json:"month"`
-	Year      int    `json:"year"`
-	Replyount int    `json:"replyount"`
+	Userid     string `json:"userid"`
+	Like       int    `json:"like"`
+	Disilike   int    `json:"disilike"`
+	Replyto    int    `json:"replyto"`
+	Desc       string `json:"desc"`
+	Videoid    int    `json:"videoid"`
+	Day        int    `json:"day"`
+	Month      int    `json:"month"`
+	Year       int    `json:"year"`
+	Replycount int    `json:"replycount"`
 }
 
 type NewPlaylist struct {

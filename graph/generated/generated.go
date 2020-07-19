@@ -860,7 +860,7 @@ input newComment {
   day: Int!
   month: Int!
   year: Int!
-  replyount: Int!
+  replycount: Int!
 }
 
 type Query {
@@ -4872,9 +4872,9 @@ func (ec *executionContext) unmarshalInputnewComment(ctx context.Context, obj in
 			if err != nil {
 				return it, err
 			}
-		case "replyount":
+		case "replycount":
 			var err error
-			it.Replyount, err = ec.unmarshalNInt2int(ctx, v)
+			it.Replycount, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
