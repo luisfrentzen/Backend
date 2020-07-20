@@ -8,7 +8,6 @@ import (
 	"Backend/graph/model"
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -338,7 +337,7 @@ func (r *mutationResolver) Subscribe(ctx context.Context, id string, chnid strin
 		for idx, i := range s {
 			if i == chnid {
 				//log.Println(len(s))
-				if len(s) == 1{
+				if len(s) == 1 {
 					s = nil
 				} else {
 					s = append(s[:idx], s[idx+1:]...)
@@ -377,19 +376,303 @@ func (r *mutationResolver) Subscribe(ctx context.Context, id string, chnid strin
 }
 
 func (r *mutationResolver) Likevid(ctx context.Context, id string, chnid string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	var user model.User
+
+	log.Println("Getting User")
+
+	err := r.DB.Model(&user).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	var video model.Video
+
+	log.Println("Getting Channel")
+
+	var vidid int
+	vidid, _ = strconv.Atoi(chnid)
+	err2 := r.DB.Model(&video).Where("id = ?", vidid).First()
+
+	if err2 != nil {
+		log.Println(err2)
+		return nil, errors.New("Video not found!")
+	}
+
+	s := strings.Split(user.Likedvideos, ",")
+
+	if s[0] == "" {
+		user.Likedvideos = chnid
+
+		video.Like = video.Like + 1
+	} else {
+		var liked = false
+
+		for idx, i := range s {
+			if i == chnid {
+				//log.Println(len(s))
+				if len(s) == 1 {
+					s = nil
+				} else {
+					s = append(s[:idx], s[idx+1:]...)
+				}
+
+				video.Like = video.Like - 1
+				liked = true
+				break
+			}
+		}
+
+		if liked == false {
+			s = append(s, chnid)
+			video.Like = video.Like + 1
+		}
+
+		user.Likedvideos = strings.Join(s, ",")
+
+	}
+
+	_, updateErr := r.DB.Model(&user).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
+	}
+
+	_, updateErr2 := r.DB.Model(&video).Where("id = ?", chnid).Update()
+
+	if updateErr2 != nil {
+		log.Println(updateErr2)
+		return nil, errors.New("Update channel failed")
+	}
+
+	return &user, nil
 }
 
 func (r *mutationResolver) Disilikevid(ctx context.Context, id string, chnid string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	var user model.User
+
+	log.Println("Getting User")
+
+	err := r.DB.Model(&user).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	var video model.Video
+
+	log.Println("Getting Channel")
+
+	var vidid int
+	vidid, _ = strconv.Atoi(chnid)
+	err2 := r.DB.Model(&video).Where("id = ?", vidid).First()
+
+	if err2 != nil {
+		log.Println(err2)
+		return nil, errors.New("Video not found!")
+	}
+
+	s := strings.Split(user.Disilikedvideos, ",")
+
+	if s[0] == "" {
+		user.Disilikedvideos = chnid
+
+		video.Disilike = video.Disilike + 1
+	} else {
+		var liked = false
+
+		for idx, i := range s {
+			if i == chnid {
+				//log.Println(len(s))
+				if len(s) == 1 {
+					s = nil
+				} else {
+					s = append(s[:idx], s[idx+1:]...)
+				}
+
+				video.Disilike = video.Disilike - 1
+				liked = true
+				break
+			}
+		}
+
+		if liked == false {
+			s = append(s, chnid)
+			video.Disilike = video.Disilike + 1
+		}
+
+		user.Disilikedvideos = strings.Join(s, ",")
+
+	}
+
+	_, updateErr := r.DB.Model(&user).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
+	}
+
+	_, updateErr2 := r.DB.Model(&video).Where("id = ?", chnid).Update()
+
+	if updateErr2 != nil {
+		log.Println(updateErr2)
+		return nil, errors.New("Update channel failed")
+	}
+
+	return &user, nil
 }
 
 func (r *mutationResolver) Likecom(ctx context.Context, id string, chnid string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	var user model.User
+
+	log.Println("Getting User")
+
+	err := r.DB.Model(&user).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	var comment model.Comment
+
+	log.Println("Getting Comment")
+
+	var comid int
+	comid, _ = strconv.Atoi(chnid)
+	err2 := r.DB.Model(&comment).Where("id = ?", comid).First()
+
+	if err2 != nil {
+		log.Println(err2)
+		return nil, errors.New("Comment not found!")
+	}
+
+	s := strings.Split(user.Likedcomments, ",")
+
+	if s[0] == "" {
+		user.Likedcomments = chnid
+
+		comment.Like = comment.Like + 1
+	} else {
+		var liked = false
+
+		for idx, i := range s {
+			if i == chnid {
+				//log.Println(len(s))
+				if len(s) == 1 {
+					s = nil
+				} else {
+					s = append(s[:idx], s[idx+1:]...)
+				}
+
+				comment.Like = comment.Like - 1
+				liked = true
+				break
+			}
+		}
+
+		if liked == false {
+			s = append(s, chnid)
+			comment.Like = comment.Like + 1
+		}
+
+		user.Likedcomments = strings.Join(s, ",")
+
+	}
+
+	_, updateErr := r.DB.Model(&user).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
+	}
+
+	_, updateErr2 := r.DB.Model(&comment).Where("id = ?", chnid).Update()
+
+	if updateErr2 != nil {
+		log.Println(updateErr2)
+		return nil, errors.New("Update comment failed")
+	}
+
+	return &user, nil
 }
 
 func (r *mutationResolver) Disilikecom(ctx context.Context, id string, chnid string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	var user model.User
+
+	log.Println("Getting User")
+
+	err := r.DB.Model(&user).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	var comment model.Comment
+
+	log.Println("Getting Comment")
+
+	var comid int
+	comid, _ = strconv.Atoi(chnid)
+	err2 := r.DB.Model(&comment).Where("id = ?", comid).First()
+
+	if err2 != nil {
+		log.Println(err2)
+		return nil, errors.New("Comment not found!")
+	}
+
+	s := strings.Split(user.Disilikedcomments, ",")
+
+	if s[0] == "" {
+		user.Disilikedcomments = chnid
+
+		comment.Disilike = comment.Disilike + 1
+	} else {
+		var liked = false
+
+		for idx, i := range s {
+			if i == chnid {
+				//log.Println(len(s))
+				if len(s) == 1 {
+					s = nil
+				} else {
+					s = append(s[:idx], s[idx+1:]...)
+				}
+
+				comment.Disilike = comment.Disilike - 1
+				liked = true
+				break
+			}
+		}
+
+		if liked == false {
+			s = append(s, chnid)
+			comment.Disilike = comment.Disilike + 1
+		}
+
+		user.Disilikedcomments = strings.Join(s, ",")
+
+	}
+
+	_, updateErr := r.DB.Model(&user).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
+	}
+
+	_, updateErr2 := r.DB.Model(&comment).Where("id = ?", chnid).Update()
+
+	if updateErr2 != nil {
+		log.Println(updateErr2)
+		return nil, errors.New("Update comment failed")
+	}
+
+	return &user, nil
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
@@ -592,10 +875,3 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
