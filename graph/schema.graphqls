@@ -222,4 +222,6 @@ type Mutation {
   disilikecom (id: String!, chnid: String!): User!
   likepost (id: String!, chnid: String!): User!
   disilikepost (id: String!, chnid: String!): User!
+
+  editAbout (id: String!, about: String!): User!
 }
