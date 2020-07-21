@@ -15,12 +15,72 @@ import (
 	pg "github.com/go-pg/pg/v10"
 )
 
+func (r *mutationResolver) CreateLink(ctx context.Context, input *model.NewLink) (*model.Link, error) {
+	link := model.Link{
+		Userid: input.Userid,
+		Label:  input.Label,
+		URL:    input.URL,
+	}
+
+	log.Println("Inserting User")
+
+	_, err := r.DB.Model(&link).Insert()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Insert new user failed")
+	} else {
+		log.Println("Create User Succeed")
+	}
+
+	return &link, nil
+}
+
+func (r *mutationResolver) CreatePost(ctx context.Context, input *model.NewPost) (*model.Post, error) {
+	post := model.Post{
+		Userid:     input.Userid,
+		Like:       input.Like,
+		Disilike:   input.Disilike,
+		Desc:       input.Desc,
+		Attachment: input.Attachment,
+		Day:        input.Day,
+		Month:      input.Month,
+		Year:       input.Year,
+	}
+
+	log.Println("Inserting User")
+
+	_, err := r.DB.Model(&post).Insert()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Insert new user failed")
+	} else {
+		log.Println("Create User Succeed")
+	}
+
+	return &post, nil
+}
+
 func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser) (*model.User, error) {
 	user := model.User{
-		ID:         input.ID,
-		Name:       input.Name,
-		Profilepic: input.Profilepic,
-		Premium:    input.Premium,
+		ID:                input.ID,
+		Name:              input.Name,
+		Profilepic:        input.Profilepic,
+		Premium:           input.Premium,
+		Likedvideos:       input.Likedvideos,
+		Disilikedvideos:   input.Disilikedvideos,
+		Likedcomments:     input.Likedcomments,
+		Disilikedcomments: input.Disilikedcomments,
+		Subscribed:        input.Subscribed,
+		Subscribers:       input.Subscribers,
+		Likedpost:         input.Likedpost,
+		Disilikedpost:     input.Disilikedpost,
+		About:             input.About,
+		Channelart:        input.Channelart,
+		Day:               input.Day,
+		Month:             input.Month,
+		Year:              input.Year,
 	}
 
 	log.Println("Inserting User")
@@ -172,6 +232,7 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input *model.NewCo
 		Month:      input.Month,
 		Year:       input.Year,
 		Replycount: input.Replycount,
+		Postid:     input.Postid,
 	}
 
 	_, err := r.DB.Model(&comment).Insert()
@@ -673,6 +734,192 @@ func (r *mutationResolver) Disilikecom(ctx context.Context, id string, chnid str
 	}
 
 	return &user, nil
+}
+
+func (r *mutationResolver) Likepost(ctx context.Context, id string, chnid string) (*model.User, error) {
+	var user model.User
+
+	log.Println("Getting User")
+
+	err := r.DB.Model(&user).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	var post model.Post
+
+	log.Println("Getting Comment")
+
+	var curpostid int
+	curpostid, _ = strconv.Atoi(chnid)
+	err2 := r.DB.Model(&post).Where("id = ?", curpostid).First()
+
+	if err2 != nil {
+		log.Println(err2)
+		return nil, errors.New("Comment not found!")
+	}
+
+	s := strings.Split(user.Likedpost, ",")
+
+	if s[0] == "" {
+		user.Likedpost = chnid
+
+		post.Like = post.Like + 1
+	} else {
+		var liked = false
+
+		for idx, i := range s {
+			if i == chnid {
+				//log.Println(len(s))
+				if len(s) == 1 {
+					s = nil
+				} else {
+					s = append(s[:idx], s[idx+1:]...)
+				}
+
+				post.Like = post.Like - 1
+				liked = true
+				break
+			}
+		}
+
+		if liked == false {
+			s = append(s, chnid)
+			post.Like = post.Like + 1
+		}
+
+		user.Likedpost = strings.Join(s, ",")
+
+	}
+
+	_, updateErr := r.DB.Model(&user).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
+	}
+
+	_, updateErr2 := r.DB.Model(&post).Where("id = ?", chnid).Update()
+
+	if updateErr2 != nil {
+		log.Println(updateErr2)
+		return nil, errors.New("Update comment failed")
+	}
+
+	return &user, nil
+}
+
+func (r *mutationResolver) Disilikepost(ctx context.Context, id string, chnid string) (*model.User, error) {
+	var user model.User
+
+	log.Println("Getting User")
+
+	err := r.DB.Model(&user).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	var post model.Post
+
+	log.Println("Getting Comment")
+
+	var curpostid int
+	curpostid, _ = strconv.Atoi(chnid)
+	err2 := r.DB.Model(&post).Where("id = ?", curpostid).First()
+
+	if err2 != nil {
+		log.Println(err2)
+		return nil, errors.New("Comment not found!")
+	}
+
+	s := strings.Split(user.Disilikedpost, ",")
+
+	if s[0] == "" {
+		user.Disilikedpost = chnid
+
+		post.Disilike = post.Disilike + 1
+	} else {
+		var liked = false
+
+		for idx, i := range s {
+			if i == chnid {
+				//log.Println(len(s))
+				if len(s) == 1 {
+					s = nil
+				} else {
+					s = append(s[:idx], s[idx+1:]...)
+				}
+
+				post.Disilike = post.Disilike - 1
+				liked = true
+				break
+			}
+		}
+
+		if liked == false {
+			s = append(s, chnid)
+			post.Disilike = post.Disilike + 1
+		}
+
+		user.Disilikedpost = strings.Join(s, ",")
+
+	}
+
+	_, updateErr := r.DB.Model(&user).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
+	}
+
+	_, updateErr2 := r.DB.Model(&post).Where("id = ?", chnid).Update()
+
+	if updateErr2 != nil {
+		log.Println(updateErr2)
+		return nil, errors.New("Update comment failed")
+	}
+
+	return &user, nil
+}
+
+func (r *queryResolver) PostByUser(ctx context.Context, userid string) ([]*model.Post, error) {
+	var posts []*model.Post
+
+	err := r.DB.Model(&posts).Where("userid = ?", userid).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query playlists")
+	}
+
+	return posts, nil
+}
+
+func (r *queryResolver) CommentByPost(ctx context.Context, id int) ([]*model.Comment, error) {
+	var comments []*model.Comment
+
+	err := r.DB.Model(&comments).Where("postid = ?", id).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query playlists")
+	}
+
+	return comments, nil
+}
+
+func (r *queryResolver) LinkByUser(ctx context.Context, userid string) ([]*model.Link, error) {
+	var links []*model.Link
+
+	err := r.DB.Model(&links).Where("userid = ?", userid).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query playlists")
+	}
+
+	return links, nil
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {

@@ -14,6 +14,14 @@ type Comment struct {
 	Month      int    `json:"month"`
 	Year       int    `json:"year"`
 	Replycount int    `json:"replycount"`
+	Postid     int    `json:"postid"`
+}
+
+type Link struct {
+	ID     string `json:"id"`
+	Label  string `json:"label"`
+	URL    string `json:"url"`
+	Userid string `json:"userid"`
 }
 
 type Playlist struct {
@@ -29,6 +37,18 @@ type Playlist struct {
 	Videos     string `json:"videos"`
 }
 
+type Post struct {
+	ID         string `json:"id"`
+	Userid     string `json:"userid"`
+	Like       int    `json:"like"`
+	Disilike   int    `json:"disilike"`
+	Desc       string `json:"desc"`
+	Attachment string `json:"attachment"`
+	Day        int    `json:"day"`
+	Month      int    `json:"month"`
+	Year       int    `json:"year"`
+}
+
 type User struct {
 	ID                string `json:"id"`
 	Name              string `json:"name"`
@@ -40,6 +60,13 @@ type User struct {
 	Disilikedcomments string `json:"disilikedcomments"`
 	Subscribed        string `json:"subscribed"`
 	Subscribers       int    `json:"subscribers"`
+	Likedpost         string `json:"likedpost"`
+	Disilikedpost     string `json:"disilikedpost"`
+	About             string `json:"about"`
+	Channelart        string `json:"channelart"`
+	Day               int    `json:"day"`
+	Month             int    `json:"month"`
+	Year              int    `json:"year"`
 }
 
 type Video struct {
@@ -78,6 +105,13 @@ type NewComment struct {
 	Month      int    `json:"month"`
 	Year       int    `json:"year"`
 	Replycount int    `json:"replycount"`
+	Postid     int    `json:"postid"`
+}
+
+type NewLink struct {
+	Label  string `json:"label"`
+	URL    string `json:"url"`
+	Userid string `json:"userid"`
 }
 
 type NewPlaylist struct {
@@ -92,6 +126,17 @@ type NewPlaylist struct {
 	Videos     string `json:"videos"`
 }
 
+type NewPost struct {
+	Userid     string `json:"userid"`
+	Like       int    `json:"like"`
+	Disilike   int    `json:"disilike"`
+	Desc       string `json:"desc"`
+	Attachment string `json:"attachment"`
+	Day        int    `json:"day"`
+	Month      int    `json:"month"`
+	Year       int    `json:"year"`
+}
+
 type NewUser struct {
 	ID                string `json:"id"`
 	Name              string `json:"name"`
@@ -103,6 +148,13 @@ type NewUser struct {
 	Disilikedcomments string `json:"disilikedcomments"`
 	Subscribed        string `json:"subscribed"`
 	Subscribers       int    `json:"subscribers"`
+	Likedpost         string `json:"likedpost"`
+	Disilikedpost     string `json:"disilikedpost"`
+	About             string `json:"about"`
+	Channelart        string `json:"channelart"`
+	Day               int    `json:"day"`
+	Month             int    `json:"month"`
+	Year              int    `json:"year"`
 }
 
 type NewVideo struct {

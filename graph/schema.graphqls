@@ -12,6 +12,36 @@ type User {
   disilikedcomments: String!
   subscribed: String!
   subscribers: Int!
+  likedpost: String!
+  disilikedpost: String!
+  about: String!
+  channelart: String!
+  day: Int!
+  month: Int!
+  year: Int!
+}
+
+type Post {
+  id: ID!
+  userid: String!
+  like: Int!
+  disilike: Int!
+  desc: String!
+  attachment: String!
+  day: Int!
+  month: Int!
+  year: Int!
+}
+
+input newPost {
+  userid: String!
+  like: Int!
+  disilike: Int!
+  desc: String!
+  attachment: String!
+  day: Int!
+  month: Int!
+  year: Int!
 }
 
 type Video {
@@ -33,6 +63,19 @@ type Video {
   day: Int!
   month: Int!
   year: Int!
+}
+
+type Link {
+  id: ID!
+  label: String!
+  url: String!
+  userid: String!
+}
+
+input newLink {
+    label: String!
+    url: String!
+    userid: String!
 }
 
 type Playlist {
@@ -60,6 +103,7 @@ type Comment {
   month: Int!
   year: Int!
   replycount: Int!
+  postid: Int!
 }
 
 input newComment {
@@ -73,9 +117,13 @@ input newComment {
   month: Int!
   year: Int!
   replycount: Int!
+  postid: Int!
 }
 
 type Query {
+  postByUser(userid: String!): [Post!]!
+  commentByPost(id: Int!): [Comment!]!
+  linkByUser(userid: String!): [Link!]!
   users: [User!]!
   videos: [Video!]!
   comments: [Comment!]!
@@ -103,6 +151,13 @@ input newUser {
   disilikedcomments: String!
   subscribed: String!
   subscribers: Int!
+  likedpost: String!
+  disilikedpost: String!
+  about: String!
+  channelart: String!
+  day: Int!
+  month: Int!
+  year: Int!
 }
 
 input newPlaylist {
@@ -142,6 +197,10 @@ input newVideo {
 }
 
 type Mutation {
+  createLink (input: newLink): Link!
+
+  createPost (input: newPost): Post!
+
   createUser (input: newUser): User!
   updateUser (id: ID!, input: newUser): User!
   deleteUser (id: ID!): Boolean!
@@ -161,4 +220,6 @@ type Mutation {
   disilikevid (id: String!, chnid: String!): User!
   likecom (id: String!, chnid: String!): User!
   disilikecom (id: String!, chnid: String!): User!
+  likepost (id: String!, chnid: String!): User!
+  disilikepost (id: String!, chnid: String!): User!
 }
