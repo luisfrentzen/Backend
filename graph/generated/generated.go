@@ -128,6 +128,7 @@ type ComplexityRoot struct {
 		PlaylistByID     func(childComplexity int, id int) int
 		Playlists        func(childComplexity int) int
 		PlaylistsByUser  func(childComplexity int, userid string) int
+		PostByID         func(childComplexity int, id int) int
 		PostByUser       func(childComplexity int, userid string) int
 		Replies          func(childComplexity int, replyto int) int
 		UserByID         func(childComplexity int, userid string) int
@@ -211,6 +212,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	PostByUser(ctx context.Context, userid string) ([]*model.Post, error)
+	PostByID(ctx context.Context, id int) (*model.Post, error)
 	CommentByPost(ctx context.Context, id int) ([]*model.Comment, error)
 	LinkByUser(ctx context.Context, userid string) ([]*model.Link, error)
 	Users(ctx context.Context) ([]*model.User, error)
@@ -887,6 +889,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.PlaylistsByUser(childComplexity, args["userid"].(string)), true
 
+	case "Query.postById":
+		if e.complexity.Query.PostByID == nil {
+			break
+		}
+
+		args, err := ec.field_Query_postById_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.PostByID(childComplexity, args["id"].(int)), true
+
 	case "Query.postByUser":
 		if e.complexity.Query.PostByUser == nil {
 			break
@@ -1418,6 +1432,7 @@ input newComment {
 
 type Query {
   postByUser(userid: String!): [Post!]!
+  postById(id: Int!): Post!
   commentByPost(id: Int!): [Comment!]!
   linkByUser(userid: String!): [Link!]!
   users: [User!]!
@@ -2131,6 +2146,20 @@ func (ec *executionContext) field_Query_playlistsByUser_args(ctx context.Context
 		}
 	}
 	args["userid"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_postById_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -4563,6 +4592,47 @@ func (ec *executionContext) _Query_postByUser(ctx context.Context, field graphql
 	res := resTmp.([]*model.Post)
 	fc.Result = res
 	return ec.marshalNPost2ᚕᚖBackendᚋgraphᚋmodelᚐPostᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_postById(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_postById_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().PostByID(rctx, args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Post)
+	fc.Result = res
+	return ec.marshalNPost2ᚖBackendᚋgraphᚋmodelᚐPost(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_commentByPost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -8438,6 +8508,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_postByUser(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "postById":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_postById(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

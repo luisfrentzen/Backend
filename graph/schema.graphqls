@@ -122,6 +122,7 @@ input newComment {
 
 type Query {
   postByUser(userid: String!): [Post!]!
+  postById(id: Int!): Post!
   commentByPost(id: Int!): [Comment!]!
   linkByUser(userid: String!): [Link!]!
   users: [User!]!

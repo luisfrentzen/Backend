@@ -1055,6 +1055,21 @@ func (r *queryResolver) PostByUser(ctx context.Context, userid string) ([]*model
 	return posts, nil
 }
 
+func (r *queryResolver) PostByID(ctx context.Context, id int) (*model.Post, error) {
+	var post model.Post
+
+	err := r.DB.Model(&post).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Failed to query user")
+	} else {
+		log.Println("Get User By Id Succeed")
+	}
+
+	return &post, nil
+}
+
 func (r *queryResolver) CommentByPost(ctx context.Context, id int) ([]*model.Comment, error) {
 	var comments []*model.Comment
 
