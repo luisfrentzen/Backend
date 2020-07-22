@@ -224,4 +224,7 @@ type Mutation {
   disilikepost (id: String!, chnid: String!): User!
 
   editAbout (id: String!, about: String!): User!
+  updateLink (id: Int!, label: String!, url: String!): Link!
+  updateprofilepic (id: String!, profilepic: String!): User!
+  updatechannelart (id: String!, channelart: String!): User!
 }

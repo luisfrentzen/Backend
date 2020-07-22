@@ -910,6 +910,79 @@ func (r *mutationResolver) EditAbout(ctx context.Context, id string, about strin
 	return &user, nil
 }
 
+func (r *mutationResolver) UpdateLink(ctx context.Context, id int, label string, url string) (*model.Link, error) {
+	var link model.Link
+
+	log.Println("Getting User")
+
+	err := r.DB.Model(&link).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	link.Label = label
+	link.URL = url
+
+	_, updateErr := r.DB.Model(&link).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
+	}
+
+	return &link, nil
+}
+
+func (r *mutationResolver) Updateprofilepic(ctx context.Context, id string, profilepic string) (*model.User, error) {
+	var user model.User
+
+	log.Println("Getting User")
+
+	err := r.DB.Model(&user).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	user.Profilepic = profilepic
+
+	_, updateErr := r.DB.Model(&user).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
+	}
+
+	return &user, nil
+}
+
+func (r *mutationResolver) Updatechannelart(ctx context.Context, id string, channelart string) (*model.User, error) {
+	var user model.User
+
+	log.Println("Getting User")
+
+	err := r.DB.Model(&user).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	user.Channelart = channelart
+
+	_, updateErr := r.DB.Model(&user).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
+	}
+
+	return &user, nil
+}
+
 func (r *queryResolver) PostByUser(ctx context.Context, userid string) ([]*model.Post, error) {
 	var posts []*model.Post
 

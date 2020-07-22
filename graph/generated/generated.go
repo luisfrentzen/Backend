@@ -66,26 +66,29 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddToPlaylist  func(childComplexity int, id string, input *model.AddToPlaylist) int
-		CreateComment  func(childComplexity int, input *model.NewComment) int
-		CreateLink     func(childComplexity int, input *model.NewLink) int
-		CreatePlaylist func(childComplexity int, input *model.NewPlaylist) int
-		CreatePost     func(childComplexity int, input *model.NewPost) int
-		CreateUser     func(childComplexity int, input *model.NewUser) int
-		CreateVideo    func(childComplexity int, input *model.NewVideo) int
-		DeleteUser     func(childComplexity int, id string) int
-		DeleteVideo    func(childComplexity int, id string) int
-		Disilikecom    func(childComplexity int, id string, chnid string) int
-		Disilikepost   func(childComplexity int, id string, chnid string) int
-		Disilikevid    func(childComplexity int, id string, chnid string) int
-		EditAbout      func(childComplexity int, id string, about string) int
-		Likecom        func(childComplexity int, id string, chnid string) int
-		Likepost       func(childComplexity int, id string, chnid string) int
-		Likevid        func(childComplexity int, id string, chnid string) int
-		Subscribe      func(childComplexity int, id string, chnid string) int
-		UpdatePlaylist func(childComplexity int, id string, input *model.NewPlaylist) int
-		UpdateUser     func(childComplexity int, id string, input *model.NewUser) int
-		UpdateVideo    func(childComplexity int, id string, input *model.NewVideo) int
+		AddToPlaylist    func(childComplexity int, id string, input *model.AddToPlaylist) int
+		CreateComment    func(childComplexity int, input *model.NewComment) int
+		CreateLink       func(childComplexity int, input *model.NewLink) int
+		CreatePlaylist   func(childComplexity int, input *model.NewPlaylist) int
+		CreatePost       func(childComplexity int, input *model.NewPost) int
+		CreateUser       func(childComplexity int, input *model.NewUser) int
+		CreateVideo      func(childComplexity int, input *model.NewVideo) int
+		DeleteUser       func(childComplexity int, id string) int
+		DeleteVideo      func(childComplexity int, id string) int
+		Disilikecom      func(childComplexity int, id string, chnid string) int
+		Disilikepost     func(childComplexity int, id string, chnid string) int
+		Disilikevid      func(childComplexity int, id string, chnid string) int
+		EditAbout        func(childComplexity int, id string, about string) int
+		Likecom          func(childComplexity int, id string, chnid string) int
+		Likepost         func(childComplexity int, id string, chnid string) int
+		Likevid          func(childComplexity int, id string, chnid string) int
+		Subscribe        func(childComplexity int, id string, chnid string) int
+		UpdateLink       func(childComplexity int, id int, label string, url string) int
+		UpdatePlaylist   func(childComplexity int, id string, input *model.NewPlaylist) int
+		UpdateUser       func(childComplexity int, id string, input *model.NewUser) int
+		UpdateVideo      func(childComplexity int, id string, input *model.NewVideo) int
+		Updatechannelart func(childComplexity int, id string, channelart string) int
+		Updateprofilepic func(childComplexity int, id string, profilepic string) int
 	}
 
 	Playlist struct {
@@ -196,6 +199,9 @@ type MutationResolver interface {
 	Likepost(ctx context.Context, id string, chnid string) (*model.User, error)
 	Disilikepost(ctx context.Context, id string, chnid string) (*model.User, error)
 	EditAbout(ctx context.Context, id string, about string) (*model.User, error)
+	UpdateLink(ctx context.Context, id int, label string, url string) (*model.Link, error)
+	Updateprofilepic(ctx context.Context, id string, profilepic string) (*model.User, error)
+	Updatechannelart(ctx context.Context, id string, channelart string) (*model.User, error)
 }
 type QueryResolver interface {
 	PostByUser(ctx context.Context, userid string) ([]*model.Post, error)
@@ -548,6 +554,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Subscribe(childComplexity, args["id"].(string), args["chnid"].(string)), true
 
+	case "Mutation.updateLink":
+		if e.complexity.Mutation.UpdateLink == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateLink_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateLink(childComplexity, args["id"].(int), args["label"].(string), args["url"].(string)), true
+
 	case "Mutation.updatePlaylist":
 		if e.complexity.Mutation.UpdatePlaylist == nil {
 			break
@@ -583,6 +601,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateVideo(childComplexity, args["id"].(string), args["input"].(*model.NewVideo)), true
+
+	case "Mutation.updatechannelart":
+		if e.complexity.Mutation.Updatechannelart == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updatechannelart_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Updatechannelart(childComplexity, args["id"].(string), args["channelart"].(string)), true
+
+	case "Mutation.updateprofilepic":
+		if e.complexity.Mutation.Updateprofilepic == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateprofilepic_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Updateprofilepic(childComplexity, args["id"].(string), args["profilepic"].(string)), true
 
 	case "Playlist.day":
 		if e.complexity.Playlist.Day == nil {
@@ -1436,6 +1478,9 @@ type Mutation {
   disilikepost (id: String!, chnid: String!): User!
 
   editAbout (id: String!, about: String!): User!
+  updateLink (id: Int!, label: String!, url: String!): Link!
+  updateprofilepic (id: String!, profilepic: String!): User!
+  updatechannelart (id: String!, channelart: String!): User!
 }
 `, BuiltIn: false},
 }
@@ -1755,6 +1800,36 @@ func (ec *executionContext) field_Mutation_subscribe_args(ctx context.Context, r
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_updateLink_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["label"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["label"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["url"]; ok {
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["url"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updatePlaylist_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1818,6 +1893,50 @@ func (ec *executionContext) field_Mutation_updateVideo_args(ctx context.Context,
 		}
 	}
 	args["input"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updatechannelart_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["channelart"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["channelart"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateprofilepic_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["profilepic"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["profilepic"] = arg1
 	return args, nil
 }
 
@@ -3401,6 +3520,129 @@ func (ec *executionContext) _Mutation_editAbout(ctx context.Context, field graph
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().EditAbout(rctx, args["id"].(string), args["about"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖBackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateLink(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateLink_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateLink(rctx, args["id"].(int), args["label"].(string), args["url"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Link)
+	fc.Result = res
+	return ec.marshalNLink2ᚖBackendᚋgraphᚋmodelᚐLink(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateprofilepic(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateprofilepic_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Updateprofilepic(rctx, args["id"].(string), args["profilepic"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖBackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updatechannelart(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updatechannelart_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Updatechannelart(rctx, args["id"].(string), args["channelart"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -7770,6 +8012,21 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "editAbout":
 			out.Values[i] = ec._Mutation_editAbout(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateLink":
+			out.Values[i] = ec._Mutation_updateLink(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateprofilepic":
+			out.Values[i] = ec._Mutation_updateprofilepic(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updatechannelart":
+			out.Values[i] = ec._Mutation_updatechannelart(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
