@@ -225,6 +225,10 @@ type Mutation {
 
   editAbout (id: String!, about: String!): User!
   updateLink (id: Int!, label: String!, url: String!): Link!
+  deleteLink (id: Int!): Boolean!
+
+  deletePost (id: Int!): Boolean!
+  updatePost (id: Int!, desc: String!): Post!
   updateprofilepic (id: String!, profilepic: String!): User!
   updatechannelart (id: String!, channelart: String!): User!
 }

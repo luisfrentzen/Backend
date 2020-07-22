@@ -935,6 +935,66 @@ func (r *mutationResolver) UpdateLink(ctx context.Context, id int, label string,
 	return &link, nil
 }
 
+func (r *mutationResolver) DeleteLink(ctx context.Context, id int) (bool, error) {
+	var link model.Link
+
+	err := r.DB.Model(&link).Where("id = ?", id).First()
+
+	if err != nil {
+		return false, errors.New("User not found!")
+	}
+
+	_, deleteErr := r.DB.Model(&link).Where("id = ?", id).Delete()
+
+	if deleteErr != nil {
+		return false, errors.New("Delete user failed")
+	}
+
+	return true, nil
+}
+
+func (r *mutationResolver) DeletePost(ctx context.Context, id int) (bool, error) {
+	var post model.Post
+
+	err := r.DB.Model(&post).Where("id = ?", id).First()
+
+	if err != nil {
+		return false, errors.New("User not found!")
+	}
+
+	_, deleteErr := r.DB.Model(&post).Where("id = ?", id).Delete()
+
+	if deleteErr != nil {
+		return false, errors.New("Delete user failed")
+	}
+
+	return true, nil
+}
+
+func (r *mutationResolver) UpdatePost(ctx context.Context, id int, desc string) (*model.Post, error) {
+	var post model.Post
+
+	log.Println("Getting User")
+
+	err := r.DB.Model(&post).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	post.Desc = desc
+
+	_, updateErr := r.DB.Model(&post).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
+	}
+
+	return &post, nil
+}
+
 func (r *mutationResolver) Updateprofilepic(ctx context.Context, id string, profilepic string) (*model.User, error) {
 	var user model.User
 

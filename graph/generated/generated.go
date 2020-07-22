@@ -73,6 +73,8 @@ type ComplexityRoot struct {
 		CreatePost       func(childComplexity int, input *model.NewPost) int
 		CreateUser       func(childComplexity int, input *model.NewUser) int
 		CreateVideo      func(childComplexity int, input *model.NewVideo) int
+		DeleteLink       func(childComplexity int, id int) int
+		DeletePost       func(childComplexity int, id int) int
 		DeleteUser       func(childComplexity int, id string) int
 		DeleteVideo      func(childComplexity int, id string) int
 		Disilikecom      func(childComplexity int, id string, chnid string) int
@@ -85,6 +87,7 @@ type ComplexityRoot struct {
 		Subscribe        func(childComplexity int, id string, chnid string) int
 		UpdateLink       func(childComplexity int, id int, label string, url string) int
 		UpdatePlaylist   func(childComplexity int, id string, input *model.NewPlaylist) int
+		UpdatePost       func(childComplexity int, id int, desc string) int
 		UpdateUser       func(childComplexity int, id string, input *model.NewUser) int
 		UpdateVideo      func(childComplexity int, id string, input *model.NewVideo) int
 		Updatechannelart func(childComplexity int, id string, channelart string) int
@@ -200,6 +203,9 @@ type MutationResolver interface {
 	Disilikepost(ctx context.Context, id string, chnid string) (*model.User, error)
 	EditAbout(ctx context.Context, id string, about string) (*model.User, error)
 	UpdateLink(ctx context.Context, id int, label string, url string) (*model.Link, error)
+	DeleteLink(ctx context.Context, id int) (bool, error)
+	DeletePost(ctx context.Context, id int) (bool, error)
+	UpdatePost(ctx context.Context, id int, desc string) (*model.Post, error)
 	Updateprofilepic(ctx context.Context, id string, profilepic string) (*model.User, error)
 	Updatechannelart(ctx context.Context, id string, channelart string) (*model.User, error)
 }
@@ -434,6 +440,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateVideo(childComplexity, args["input"].(*model.NewVideo)), true
 
+	case "Mutation.deleteLink":
+		if e.complexity.Mutation.DeleteLink == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteLink_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteLink(childComplexity, args["id"].(int)), true
+
+	case "Mutation.deletePost":
+		if e.complexity.Mutation.DeletePost == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deletePost_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeletePost(childComplexity, args["id"].(int)), true
+
 	case "Mutation.deleteUser":
 		if e.complexity.Mutation.DeleteUser == nil {
 			break
@@ -577,6 +607,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdatePlaylist(childComplexity, args["id"].(string), args["input"].(*model.NewPlaylist)), true
+
+	case "Mutation.updatePost":
+		if e.complexity.Mutation.UpdatePost == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updatePost_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdatePost(childComplexity, args["id"].(int), args["desc"].(string)), true
 
 	case "Mutation.updateUser":
 		if e.complexity.Mutation.UpdateUser == nil {
@@ -1479,6 +1521,10 @@ type Mutation {
 
   editAbout (id: String!, about: String!): User!
   updateLink (id: Int!, label: String!, url: String!): Link!
+  deleteLink (id: Int!): Boolean!
+
+  deletePost (id: Int!): Boolean!
+  updatePost (id: Int!, desc: String!): Post!
   updateprofilepic (id: String!, profilepic: String!): User!
   updatechannelart (id: String!, channelart: String!): User!
 }
@@ -1593,6 +1639,34 @@ func (ec *executionContext) field_Mutation_createVideo_args(ctx context.Context,
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteLink_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deletePost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -1849,6 +1923,28 @@ func (ec *executionContext) field_Mutation_updatePlaylist_args(ctx context.Conte
 		}
 	}
 	args["input"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updatePost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["desc"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["desc"] = arg1
 	return args, nil
 }
 
@@ -3575,6 +3671,129 @@ func (ec *executionContext) _Mutation_updateLink(ctx context.Context, field grap
 	res := resTmp.(*model.Link)
 	fc.Result = res
 	return ec.marshalNLink2ᚖBackendᚋgraphᚋmodelᚐLink(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteLink(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteLink_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteLink(rctx, args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deletePost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deletePost_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeletePost(rctx, args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updatePost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updatePost_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdatePost(rctx, args["id"].(int), args["desc"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Post)
+	fc.Result = res
+	return ec.marshalNPost2ᚖBackendᚋgraphᚋmodelᚐPost(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateprofilepic(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -8017,6 +8236,21 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "updateLink":
 			out.Values[i] = ec._Mutation_updateLink(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteLink":
+			out.Values[i] = ec._Mutation_deleteLink(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deletePost":
+			out.Values[i] = ec._Mutation_deletePost(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updatePost":
+			out.Values[i] = ec._Mutation_updatePost(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
