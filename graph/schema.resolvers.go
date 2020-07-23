@@ -1304,11 +1304,20 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 func (r *queryResolver) Videos(ctx context.Context, sort string) ([]*model.Video, error) {
 	var videos []*model.Video
 
-	err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Select()
+	if(sort == "view"){
+		err := r.DB.Model(&videos).Order("view DESC").Select()
 
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("Failed to query videos")
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("Failed to query videos")
+		}
+	} else {
+		err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Select()
+
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("Failed to query videos")
+		}
 	}
 
 	return videos, nil
