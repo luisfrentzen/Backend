@@ -126,19 +126,22 @@ type Query {
   commentByPost(id: Int!): [Comment!]!
   linkByUser(userid: String!): [Link!]!
   users: [User!]!
-  videos: [Video!]!
+  videos(sort: String!): [Video!]!
   comments: [Comment!]!
-  commentsByVideo(videoid: Int!): [Comment!]!
+  commentsByVideo(videoid: Int!, sort: String!): [Comment!]!
   replies(replyto: Int!): [Comment!]!
   playlists: [Playlist!]!
   playlistsByUser(userid: String!): [Playlist!]!
-  videosByUser(userid: String!): [Video!]!
+  videosByUser(userid: String!, sort: String!): [Video!]!
   videosByCategory(category: String!): [Video!]!
   userById(userid: String!): [User!]!
   videoById(id: Int!): [Video!]!
   playlistById(id: Int!): [Playlist!]!
   videosByIds(id: String!): [Video!]!
   commentById(id: Int!): [Comment!]!
+
+  usersByIds(id: String!): [User!]!
+
 }
 
 input newUser {
@@ -238,4 +241,5 @@ type Mutation {
   updatePost (id: Int!, desc: String!): Post!
   updateprofilepic (id: String!, profilepic: String!): User!
   updatechannelart (id: String!, channelart: String!): User!
+
 }

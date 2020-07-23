@@ -128,7 +128,7 @@ type ComplexityRoot struct {
 		CommentByID      func(childComplexity int, id int) int
 		CommentByPost    func(childComplexity int, id int) int
 		Comments         func(childComplexity int) int
-		CommentsByVideo  func(childComplexity int, videoid int) int
+		CommentsByVideo  func(childComplexity int, videoid int, sort string) int
 		LinkByUser       func(childComplexity int, userid string) int
 		PlaylistByID     func(childComplexity int, id int) int
 		Playlists        func(childComplexity int) int
@@ -138,11 +138,12 @@ type ComplexityRoot struct {
 		Replies          func(childComplexity int, replyto int) int
 		UserByID         func(childComplexity int, userid string) int
 		Users            func(childComplexity int) int
+		UsersByIds       func(childComplexity int, id string) int
 		VideoByID        func(childComplexity int, id int) int
-		Videos           func(childComplexity int) int
+		Videos           func(childComplexity int, sort string) int
 		VideosByCategory func(childComplexity int, category string) int
 		VideosByIds      func(childComplexity int, id string) int
-		VideosByUser     func(childComplexity int, userid string) int
+		VideosByUser     func(childComplexity int, userid string, sort string) int
 	}
 
 	User struct {
@@ -226,19 +227,20 @@ type QueryResolver interface {
 	CommentByPost(ctx context.Context, id int) ([]*model.Comment, error)
 	LinkByUser(ctx context.Context, userid string) ([]*model.Link, error)
 	Users(ctx context.Context) ([]*model.User, error)
-	Videos(ctx context.Context) ([]*model.Video, error)
+	Videos(ctx context.Context, sort string) ([]*model.Video, error)
 	Comments(ctx context.Context) ([]*model.Comment, error)
-	CommentsByVideo(ctx context.Context, videoid int) ([]*model.Comment, error)
+	CommentsByVideo(ctx context.Context, videoid int, sort string) ([]*model.Comment, error)
 	Replies(ctx context.Context, replyto int) ([]*model.Comment, error)
 	Playlists(ctx context.Context) ([]*model.Playlist, error)
 	PlaylistsByUser(ctx context.Context, userid string) ([]*model.Playlist, error)
-	VideosByUser(ctx context.Context, userid string) ([]*model.Video, error)
+	VideosByUser(ctx context.Context, userid string, sort string) ([]*model.Video, error)
 	VideosByCategory(ctx context.Context, category string) ([]*model.Video, error)
 	UserByID(ctx context.Context, userid string) ([]*model.User, error)
 	VideoByID(ctx context.Context, id int) ([]*model.Video, error)
 	PlaylistByID(ctx context.Context, id int) ([]*model.Playlist, error)
 	VideosByIds(ctx context.Context, id string) ([]*model.Video, error)
 	CommentByID(ctx context.Context, id int) ([]*model.Comment, error)
+	UsersByIds(ctx context.Context, id string) ([]*model.User, error)
 }
 
 type executableSchema struct {
@@ -914,7 +916,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.CommentsByVideo(childComplexity, args["videoid"].(int)), true
+		return e.complexity.Query.CommentsByVideo(childComplexity, args["videoid"].(int), args["sort"].(string)), true
 
 	case "Query.linkByUser":
 		if e.complexity.Query.LinkByUser == nil {
@@ -1014,6 +1016,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Users(childComplexity), true
 
+	case "Query.usersByIds":
+		if e.complexity.Query.UsersByIds == nil {
+			break
+		}
+
+		args, err := ec.field_Query_usersByIds_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.UsersByIds(childComplexity, args["id"].(string)), true
+
 	case "Query.videoById":
 		if e.complexity.Query.VideoByID == nil {
 			break
@@ -1031,7 +1045,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.Videos(childComplexity), true
+		args, err := ec.field_Query_videos_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Videos(childComplexity, args["sort"].(string)), true
 
 	case "Query.videosByCategory":
 		if e.complexity.Query.VideosByCategory == nil {
@@ -1067,7 +1086,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.VideosByUser(childComplexity, args["userid"].(string)), true
+		return e.complexity.Query.VideosByUser(childComplexity, args["userid"].(string), args["sort"].(string)), true
 
 	case "User.about":
 		if e.complexity.User.About == nil {
@@ -1506,19 +1525,22 @@ type Query {
   commentByPost(id: Int!): [Comment!]!
   linkByUser(userid: String!): [Link!]!
   users: [User!]!
-  videos: [Video!]!
+  videos(sort: String!): [Video!]!
   comments: [Comment!]!
-  commentsByVideo(videoid: Int!): [Comment!]!
+  commentsByVideo(videoid: Int!, sort: String!): [Comment!]!
   replies(replyto: Int!): [Comment!]!
   playlists: [Playlist!]!
   playlistsByUser(userid: String!): [Playlist!]!
-  videosByUser(userid: String!): [Video!]!
+  videosByUser(userid: String!, sort: String!): [Video!]!
   videosByCategory(category: String!): [Video!]!
   userById(userid: String!): [User!]!
   videoById(id: Int!): [Video!]!
   playlistById(id: Int!): [Playlist!]!
   videosByIds(id: String!): [Video!]!
   commentById(id: Int!): [Comment!]!
+
+  usersByIds(id: String!): [User!]!
+
 }
 
 input newUser {
@@ -1618,6 +1640,7 @@ type Mutation {
   updatePost (id: Int!, desc: String!): Post!
   updateprofilepic (id: String!, profilepic: String!): User!
   updatechannelart (id: String!, channelart: String!): User!
+
 }
 `, BuiltIn: false},
 }
@@ -2282,6 +2305,14 @@ func (ec *executionContext) field_Query_commentsByVideo_args(ctx context.Context
 		}
 	}
 	args["videoid"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["sort"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sort"] = arg1
 	return args, nil
 }
 
@@ -2383,6 +2414,20 @@ func (ec *executionContext) field_Query_userById_args(ctx context.Context, rawAr
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_usersByIds_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_videoById_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2436,6 +2481,28 @@ func (ec *executionContext) field_Query_videosByUser_args(ctx context.Context, r
 		}
 	}
 	args["userid"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["sort"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sort"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_videos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["sort"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sort"] = arg0
 	return args, nil
 }
 
@@ -5149,9 +5216,16 @@ func (ec *executionContext) _Query_videos(ctx context.Context, field graphql.Col
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_videos_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Videos(rctx)
+		return ec.resolvers.Query().Videos(rctx, args["sort"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5226,7 +5300,7 @@ func (ec *executionContext) _Query_commentsByVideo(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().CommentsByVideo(rctx, args["videoid"].(int))
+		return ec.resolvers.Query().CommentsByVideo(rctx, args["videoid"].(int), args["sort"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5383,7 +5457,7 @@ func (ec *executionContext) _Query_videosByUser(ctx context.Context, field graph
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().VideosByUser(rctx, args["userid"].(string))
+		return ec.resolvers.Query().VideosByUser(rctx, args["userid"].(string), args["sort"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5644,6 +5718,47 @@ func (ec *executionContext) _Query_commentById(ctx context.Context, field graphq
 	res := resTmp.([]*model.Comment)
 	fc.Result = res
 	return ec.marshalNComment2ᚕᚖBackendᚋgraphᚋmodelᚐCommentᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_usersByIds(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_usersByIds_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().UsersByIds(rctx, args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚕᚖBackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -9154,6 +9269,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_commentById(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "usersByIds":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_usersByIds(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

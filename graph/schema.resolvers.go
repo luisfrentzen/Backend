@@ -401,6 +401,9 @@ func (r *mutationResolver) RemoveFromPlaylist(ctx context.Context, id string, vi
 
 	day, month, year := time.Now().Date()
 
+
+
+	playlist.Videos = strings.Join(s, ",")
 	playlist.Day = day
 	playlist.Month = int(month)
 	playlist.Year = year
@@ -643,7 +646,7 @@ func (r *mutationResolver) Likevid(ctx context.Context, id string, chnid string)
 	log.Println("Getting Channel")
 
 	var vidid int
-		vidid, _ = strconv.Atoi(chnid)
+	vidid, _ = strconv.Atoi(chnid)
 	err2 := r.DB.Model(&video).Where("id = ?", vidid).First()
 
 	if err2 != nil {
@@ -1236,7 +1239,7 @@ func (r *mutationResolver) Updatechannelart(ctx context.Context, id string, chan
 func (r *queryResolver) PostByUser(ctx context.Context, userid string) ([]*model.Post, error) {
 	var posts []*model.Post
 
-	err := r.DB.Model(&posts).Where("userid = ?", userid).Select()
+	err := r.DB.Model(&posts).Order("year DESC", "month DESC", "day DESC").Where("userid = ?", userid).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlists")
@@ -1263,7 +1266,7 @@ func (r *queryResolver) PostByID(ctx context.Context, id int) (*model.Post, erro
 func (r *queryResolver) CommentByPost(ctx context.Context, id int) ([]*model.Comment, error) {
 	var comments []*model.Comment
 
-	err := r.DB.Model(&comments).Where("postid = ?", id).Select()
+	err := r.DB.Model(&comments).Order("year DESC", "month DESC", "day DESC").Where("postid = ?", id).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlists")
@@ -1298,12 +1301,13 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	return users, nil
 }
 
-func (r *queryResolver) Videos(ctx context.Context) ([]*model.Video, error) {
+func (r *queryResolver) Videos(ctx context.Context, sort string) ([]*model.Video, error) {
 	var videos []*model.Video
 
-	err := r.DB.Model(&videos).Order("id").Select()
+	err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Select()
 
 	if err != nil {
+		log.Println(err)
 		return nil, errors.New("Failed to query videos")
 	}
 
@@ -1313,7 +1317,7 @@ func (r *queryResolver) Videos(ctx context.Context) ([]*model.Video, error) {
 func (r *queryResolver) Comments(ctx context.Context) ([]*model.Comment, error) {
 	var comments []*model.Comment
 
-	err := r.DB.Model(&comments).Order("id").Select()
+	err := r.DB.Model(&comments).Order("year DESC", "month DESC", "day DESC").Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query videos")
@@ -1322,14 +1326,23 @@ func (r *queryResolver) Comments(ctx context.Context) ([]*model.Comment, error) 
 	return comments, nil
 }
 
-func (r *queryResolver) CommentsByVideo(ctx context.Context, videoid int) ([]*model.Comment, error) {
+func (r *queryResolver) CommentsByVideo(ctx context.Context, videoid int, sort string) ([]*model.Comment, error) {
 	var comments []*model.Comment
 
-	err := r.DB.Model(&comments).Where("videoid = ?", videoid).Select()
+	if(sort == ""){
+		err := r.DB.Model(&comments).Order("year DESC", "month DESC", "day DESC").Where("videoid = ?", videoid).Select()
 
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("Failed to query playlists")
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("Failed to query playlists")
+		}
+	} else if (sort == "like"){
+		err := r.DB.Model(&comments).Order("like DESC").Where("videoid = ?", videoid).Select()
+
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("Failed to query playlists")
+		}
 	}
 
 	return comments, nil
@@ -1338,7 +1351,7 @@ func (r *queryResolver) CommentsByVideo(ctx context.Context, videoid int) ([]*mo
 func (r *queryResolver) Replies(ctx context.Context, replyto int) ([]*model.Comment, error) {
 	var comments []*model.Comment
 
-	err := r.DB.Model(&comments).Where("replyto = ?", replyto).Select()
+	err := r.DB.Model(&comments).Order("year DESC", "month DESC", "day DESC").Where("replyto = ?", replyto).Select()
 
 	if err != nil {
 		log.Println(err)
@@ -1351,7 +1364,7 @@ func (r *queryResolver) Replies(ctx context.Context, replyto int) ([]*model.Comm
 func (r *queryResolver) Playlists(ctx context.Context) ([]*model.Playlist, error) {
 	var playlists []*model.Playlist
 
-	err := r.DB.Model(&playlists).Order("id").Select()
+	err := r.DB.Model(&playlists).Order("year DESC", "month DESC", "day DESC").Order("id").Select()
 
 	if err != nil {
 		log.Println(err)
@@ -1364,7 +1377,7 @@ func (r *queryResolver) Playlists(ctx context.Context) ([]*model.Playlist, error
 func (r *queryResolver) PlaylistsByUser(ctx context.Context, userid string) ([]*model.Playlist, error) {
 	var playlists []*model.Playlist
 
-	err := r.DB.Model(&playlists).Where("userid = ?", userid).Select()
+	err := r.DB.Model(&playlists).Order("year DESC", "month DESC", "day DESC").Where("userid = ?", userid).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlists")
@@ -1373,14 +1386,29 @@ func (r *queryResolver) PlaylistsByUser(ctx context.Context, userid string) ([]*
 	return playlists, nil
 }
 
-func (r *queryResolver) VideosByUser(ctx context.Context, userid string) ([]*model.Video, error) {
+func (r *queryResolver) VideosByUser(ctx context.Context, userid string, sort string) ([]*model.Video, error) {
 	var videos []*model.Video
 
-	err := r.DB.Model(&videos).Where("userid = ?", userid).Select()
+	if(sort == "") {
+		err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("userid = ?", userid).Select()
 
-	if err != nil {
-		return nil, errors.New("Failed to query videos")
+		if err != nil {
+			return nil, errors.New("Failed to query videos")
+		}
+	} else if (sort == "old") {
+		err := r.DB.Model(&videos).Order("year ASC", "month ASC", "day ASC").Where("userid = ?", userid).Select()
+
+		if err != nil {
+			return nil, errors.New("Failed to query videos")
+		}
+	} else if (sort == "view") {
+		err := r.DB.Model(&videos).Order("view DESC").Where("userid = ?", userid).Select()
+
+		if err != nil {
+			return nil, errors.New("Failed to query videos")
+		}
 	}
+
 
 	return videos, nil
 }
@@ -1388,7 +1416,7 @@ func (r *queryResolver) VideosByUser(ctx context.Context, userid string) ([]*mod
 func (r *queryResolver) VideosByCategory(ctx context.Context, category string) ([]*model.Video, error) {
 	var videos []*model.Video
 
-	err := r.DB.Model(&videos).Where("category = ?", category).Select()
+	err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("category = ?", category).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query videos")
@@ -1474,6 +1502,32 @@ func (r *queryResolver) CommentByID(ctx context.Context, id int) ([]*model.Comme
 	}
 
 	return comments, nil
+}
+
+func (r *queryResolver) UsersByIds(ctx context.Context, id string) ([]*model.User, error) {
+	var users []*model.User
+
+	s := strings.Split(id, ",")
+	//var idArr = []int64{}
+
+	//for _, i := range s {
+		//j, err := strconv.ParseInt(i, 10, 64)
+		//if err != nil {
+		//	log.Println(err)
+		//}
+
+	//	idArr = append(idArr, j)
+	//}
+
+	_, err := r.DB.Query(&users, `SELECT * FROM users WHERE id IN (?) ORDER BY users.name ASC`, pg.Strings(s))
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Failed to query video")
+	} else {
+		log.Println("Get Video By Id Succeed")
+	}
+	return users, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
