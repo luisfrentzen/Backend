@@ -215,6 +215,12 @@ type Mutation {
   createPlaylist (input: newPlaylist): Playlist!
   updatePlaylist (id: ID!, input: newPlaylist): Playlist!
   addToPlaylist (id: ID!, input: addToPlaylist): Playlist!
+  removeFromPlaylist (id: ID!, videoid: Int!): Playlist!
+  removeAllFromPlaylist (id: ID!): Playlist!
+  editPlaylist(id: ID!, title: String!, visibility: String!, desc: String!): Playlist!
+
+  viewVideo (id: ID!): Video!
+  viewPlaylist (id: ID!): Playlist!
 
   subscribe (id: String!, chnid: String!): User!
   likevid (id: String!, chnid: String!): User!

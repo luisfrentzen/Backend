@@ -11,6 +11,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	pg "github.com/go-pg/pg/v10"
 )
@@ -313,7 +314,6 @@ func (r *mutationResolver) UpdatePlaylist(ctx context.Context, id string, input 
 
 	playlist.Title = input.Title
 	playlist.Desc = input.Desc
-	playlist.Videos = input.Videos
 	playlist.Visibility = input.Visibility
 	playlist.Day = input.Day
 	playlist.Month = input.Month
@@ -348,6 +348,196 @@ func (r *mutationResolver) AddToPlaylist(ctx context.Context, id string, input *
 	} else {
 		playlist.Videos += "," + input.Videos
 	}
+
+	day, month, year := time.Now().Date()
+
+	playlist.Day = day
+	playlist.Month = int(month)
+	playlist.Year = year
+
+	log.Println("Updated Videos")
+
+	_, updateErr := r.DB.Model(&playlist).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update playlist failed")
+	}
+
+	log.Println("Update succeeded")
+
+	return &playlist, nil
+}
+
+func (r *mutationResolver) RemoveFromPlaylist(ctx context.Context, id string, videoid int) (*model.Playlist, error) {
+	var playlist model.Playlist
+
+	log.Println("Updating")
+
+	err := r.DB.Model(&playlist).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Playlist not found!")
+	}
+
+	log.Println("Playlist Found")
+
+	s := strings.Split(playlist.Videos, ",")
+
+	for idx, i := range s {
+		var j, _ = strconv.Atoi(i)
+		if j == videoid {
+			//log.Println(len(s))
+			if len(s) == 1 {
+				s = nil
+			} else {
+				s = append(s[:idx], s[idx+1:]...)
+			}
+
+			break
+		}
+	}
+
+	day, month, year := time.Now().Date()
+
+	playlist.Day = day
+	playlist.Month = int(month)
+	playlist.Year = year
+
+	log.Println("Updated Videos")
+
+	_, updateErr := r.DB.Model(&playlist).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update playlist failed")
+	}
+
+	log.Println("Update succeeded")
+
+	return &playlist, nil
+}
+
+func (r *mutationResolver) RemoveAllFromPlaylist(ctx context.Context, id string) (*model.Playlist, error) {
+	var playlist model.Playlist
+
+	log.Println("Updating")
+
+	err := r.DB.Model(&playlist).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Playlist not found!")
+	}
+
+	log.Println("Playlist Found")
+
+	playlist.Videos = ""
+
+	day, month, year := time.Now().Date()
+
+	playlist.Day = day
+	playlist.Month = int(month)
+	playlist.Year = year
+
+	log.Println("Updated Videos")
+
+	_, updateErr := r.DB.Model(&playlist).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update playlist failed")
+	}
+
+	log.Println("Update succeeded")
+
+	return &playlist, nil
+}
+
+func (r *mutationResolver) EditPlaylist(ctx context.Context, id string, title string, visibility string, desc string) (*model.Playlist, error) {
+	var playlist model.Playlist
+
+	log.Println("Updating")
+
+	err := r.DB.Model(&playlist).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Playlist not found!")
+	}
+
+	log.Println("Playlist Found")
+
+	playlist.Title = title
+	playlist.Visibility = visibility
+	playlist.Desc = desc
+
+	day, month, year := time.Now().Date()
+
+	playlist.Day = day
+	playlist.Month = int(month)
+	playlist.Year = year
+
+	log.Println("Updated Videos")
+
+	_, updateErr := r.DB.Model(&playlist).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update playlist failed")
+	}
+
+	log.Println("Update succeeded")
+
+	return &playlist, nil
+}
+
+func (r *mutationResolver) ViewVideo(ctx context.Context, id string) (*model.Video, error) {
+	var video model.Video
+
+	log.Println("Updating")
+
+	err := r.DB.Model(&video).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Playlist not found!")
+	}
+
+	log.Println("Playlist Found")
+
+	video.View = video.View + 1
+
+	log.Println("Updated Videos")
+
+	_, updateErr := r.DB.Model(&video).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update playlist failed")
+	}
+
+	log.Println("Update succeeded")
+
+	return &video, nil
+}
+
+func (r *mutationResolver) ViewPlaylist(ctx context.Context, id string) (*model.Playlist, error) {
+	var playlist model.Playlist
+
+	log.Println("Updating")
+
+	err := r.DB.Model(&playlist).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Playlist not found!")
+	}
+
+	log.Println("Playlist Found")
+
+	playlist.View = playlist.View + 1
 
 	log.Println("Updated Videos")
 
@@ -453,7 +643,7 @@ func (r *mutationResolver) Likevid(ctx context.Context, id string, chnid string)
 	log.Println("Getting Channel")
 
 	var vidid int
-	vidid, _ = strconv.Atoi(chnid)
+		vidid, _ = strconv.Atoi(chnid)
 	err2 := r.DB.Model(&video).Where("id = ?", vidid).First()
 
 	if err2 != nil {
