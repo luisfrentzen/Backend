@@ -67,6 +67,10 @@ type User struct {
 	Day               int    `json:"day"`
 	Month             int    `json:"month"`
 	Year              int    `json:"year"`
+	Premiday          int    `json:"premiday"`
+	Premimonth        int    `json:"premimonth"`
+	Premiyear         int    `json:"premiyear"`
+	Premitype         string `json:"premitype"`
 }
 
 type Video struct {
@@ -88,6 +92,8 @@ type Video struct {
 	Day         int    `json:"day"`
 	Month       int    `json:"month"`
 	Year        int    `json:"year"`
+	Duration    int    `json:"duration"`
+	Premium     string `json:"premium"`
 }
 
 type AddToPlaylist struct {
@@ -155,6 +161,10 @@ type NewUser struct {
 	Day               int    `json:"day"`
 	Month             int    `json:"month"`
 	Year              int    `json:"year"`
+	Premiday          int    `json:"premiday"`
+	Premimonth        int    `json:"premimonth"`
+	Premiyear         int    `json:"premiyear"`
+	Premitype         string `json:"premitype"`
 }
 
 type NewVideo struct {
@@ -175,4 +185,6 @@ type NewVideo struct {
 	Day         int    `json:"day"`
 	Month       int    `json:"month"`
 	Year        int    `json:"year"`
+	Duration    int    `json:"duration"`
+	Premium     string `json:"premium"`
 }

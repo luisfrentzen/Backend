@@ -65,23 +65,9 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input *model.NewPost)
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser) (*model.User, error) {
 	user := model.User{
-		ID:                input.ID,
-		Name:              input.Name,
-		Profilepic:        input.Profilepic,
-		Premium:           input.Premium,
-		Likedvideos:       input.Likedvideos,
-		Disilikedvideos:   input.Disilikedvideos,
-		Likedcomments:     input.Likedcomments,
-		Disilikedcomments: input.Disilikedcomments,
-		Subscribed:        input.Subscribed,
-		Subscribers:       input.Subscribers,
-		Likedpost:         input.Likedpost,
-		Disilikedpost:     input.Disilikedpost,
-		About:             input.About,
-		Channelart:        input.Channelart,
-		Day:               input.Day,
-		Month:             input.Month,
-		Year:              input.Year,
+		ID:         input.ID,
+		Name:       input.Name,
+		Profilepic: input.Profilepic,
 	}
 
 	log.Println("Inserting User")
@@ -165,6 +151,8 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 		Day:         input.Day,
 		Month:       input.Month,
 		Year:        input.Year,
+		Premium:     input.Premium,
+		Duration:    input.Duration,
 	}
 
 	_, err := r.DB.Model(&video).Insert()
@@ -401,8 +389,6 @@ func (r *mutationResolver) RemoveFromPlaylist(ctx context.Context, id string, vi
 
 	day, month, year := time.Now().Date()
 
-
-
 	playlist.Videos = strings.Join(s, ",")
 	playlist.Day = day
 	playlist.Month = int(month)
@@ -554,6 +540,35 @@ func (r *mutationResolver) ViewPlaylist(ctx context.Context, id string) (*model.
 	log.Println("Update succeeded")
 
 	return &playlist, nil
+}
+
+func (r *mutationResolver) MakeUserPremium(ctx context.Context, id string, subType string) (*model.User, error) {
+	var user model.User
+
+	log.Println("Getting User")
+
+	err := r.DB.Model(&user).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	user.Premium = "yes"
+	user.Premitype = subType
+	day, month, year := time.Now().Date()
+	user.Premiday = day
+	user.Premimonth = int(month)
+	user.Premiyear = year
+
+	_, updateErr := r.DB.Model(&user).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
+	}
+
+	return &user, nil
 }
 
 func (r *mutationResolver) Subscribe(ctx context.Context, id string, chnid string) (*model.User, error) {
@@ -1301,22 +1316,78 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	return users, nil
 }
 
-func (r *queryResolver) Videos(ctx context.Context, sort string) ([]*model.Video, error) {
+func (r *queryResolver) Videos(ctx context.Context, sort string, filter string, premium string) ([]*model.Video, error) {
 	var videos []*model.Video
 
-	if(sort == "view"){
-		err := r.DB.Model(&videos).Order("view DESC").Select()
+	if premium == "yes" {
+		if sort == "view" {
+			if filter == "all" {
+				err := r.DB.Model(&videos).Order("view DESC").Where("visibility = ?" , "public").Select()
 
-		if err != nil {
-			log.Println(err)
-			return nil, errors.New("Failed to query videos")
+				if err != nil {
+					log.Println(err)
+					return nil, errors.New("Failed to query videos")
+				}
+			} else {
+				err := r.DB.Model(&videos).Order("view DESC").Where("restriction = ? and visibility = ? ", "all", "public", ).Select()
+
+				if err != nil {
+					log.Println(err)
+					return nil, errors.New("Failed to query videos")
+				}
+			}
+		} else {
+			if filter == "all" {
+				err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("visibility = ?", "public").Select()
+
+				if err != nil {
+					log.Println(err)
+					return nil, errors.New("Failed to query videos")
+				}
+			} else {
+				err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("restriction = ? and visibility = ?", "all", "public").Select()
+
+				if err != nil {
+					log.Println(err)
+					return nil, errors.New("Failed to query videos")
+				}
+			}
+
 		}
 	} else {
-		err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Select()
+		if sort == "view" {
+			if filter == "all" {
+				err := r.DB.Model(&videos).Order("view DESC").Where("premium = ? and visibility = ?", "no", "public").Select()
 
-		if err != nil {
-			log.Println(err)
-			return nil, errors.New("Failed to query videos")
+				if err != nil {
+					log.Println(err)
+					return nil, errors.New("Failed to query videos")
+				}
+			} else {
+				err := r.DB.Model(&videos).Order("view DESC").Where("restriction = ? and visibility = ? and premium - ?", "all", "public", "no").Select()
+
+				if err != nil {
+					log.Println(err)
+					return nil, errors.New("Failed to query videos")
+				}
+			}
+		} else {
+			if filter == "all" {
+				err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("premium = ? and visibility = ?", "no", "public").Select()
+
+				if err != nil {
+					log.Println(err)
+					return nil, errors.New("Failed to query videos")
+				}
+			} else {
+				err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("restriction = ? and visibility = ? and premium = ?", "all", "public", "no").Select()
+
+				if err != nil {
+					log.Println(err)
+					return nil, errors.New("Failed to query videos")
+				}
+			}
+
 		}
 	}
 
@@ -1338,14 +1409,14 @@ func (r *queryResolver) Comments(ctx context.Context) ([]*model.Comment, error) 
 func (r *queryResolver) CommentsByVideo(ctx context.Context, videoid int, sort string) ([]*model.Comment, error) {
 	var comments []*model.Comment
 
-	if(sort == ""){
+	if sort == "" {
 		err := r.DB.Model(&comments).Order("year DESC", "month DESC", "day DESC").Where("videoid = ?", videoid).Select()
 
 		if err != nil {
 			log.Println(err)
 			return nil, errors.New("Failed to query playlists")
 		}
-	} else if (sort == "like"){
+	} else if sort == "like" {
 		err := r.DB.Model(&comments).Order("like DESC").Where("videoid = ?", videoid).Select()
 
 		if err != nil {
@@ -1395,29 +1466,94 @@ func (r *queryResolver) PlaylistsByUser(ctx context.Context, userid string) ([]*
 	return playlists, nil
 }
 
-func (r *queryResolver) VideosByUser(ctx context.Context, userid string, sort string) ([]*model.Video, error) {
+func (r *queryResolver) VideosByUser(ctx context.Context, userid string, sort string, premium string, privacy string) ([]*model.Video, error) {
 	var videos []*model.Video
 
-	if(sort == "") {
-		err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("userid = ?", userid).Select()
+	if premium == "yes" {
+		if privacy == "all" {
+			if sort == "" {
+				err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("userid = ?", userid).Select()
 
-		if err != nil {
-			return nil, errors.New("Failed to query videos")
+				if err != nil {
+					return nil, errors.New("Failed to query videos")
+				}
+			} else if sort == "old" {
+				err := r.DB.Model(&videos).Order("year ASC", "month ASC", "day ASC").Where("userid = ?", userid).Select()
+
+				if err != nil {
+					return nil, errors.New("Failed to query videos")
+				}
+			} else if sort == "view" {
+				err := r.DB.Model(&videos).Order("view DESC").Where("userid = ? ", userid).Select()
+
+				if err != nil {
+					return nil, errors.New("Failed to query videos")
+				}
+			}
+		} else {
+			if sort == "" {
+				err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("userid = ? and visibility = ?", userid, "public").Select()
+
+				if err != nil {
+					return nil, errors.New("Failed to query videos")
+				}
+			} else if sort == "old" {
+				err := r.DB.Model(&videos).Order("year ASC", "month ASC", "day ASC").Where("userid = ? and visibility = ?", userid, "public").Select()
+
+				if err != nil {
+					return nil, errors.New("Failed to query videos")
+				}
+			} else if sort == "view" {
+				err := r.DB.Model(&videos).Order("view DESC").Where("userid = ? and visibility = ?", userid, "public").Select()
+
+				if err != nil {
+					return nil, errors.New("Failed to query videos")
+				}
+			}
 		}
-	} else if (sort == "old") {
-		err := r.DB.Model(&videos).Order("year ASC", "month ASC", "day ASC").Where("userid = ?", userid).Select()
+	} else {
+		if privacy == "all" {
+			if sort == "" {
+				err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("userid = ? and premium = ?", userid, "no").Select()
 
-		if err != nil {
-			return nil, errors.New("Failed to query videos")
-		}
-	} else if (sort == "view") {
-		err := r.DB.Model(&videos).Order("view DESC").Where("userid = ?", userid).Select()
+				if err != nil {
+					return nil, errors.New("Failed to query videos")
+				}
+			} else if sort == "old" {
+				err := r.DB.Model(&videos).Order("year ASC", "month ASC", "day ASC").Where("userid = ? and premium = ? ", userid, "no").Select()
 
-		if err != nil {
-			return nil, errors.New("Failed to query videos")
+				if err != nil {
+					return nil, errors.New("Failed to query videos")
+				}
+			} else if sort == "view" {
+				err := r.DB.Model(&videos).Order("view DESC").Where("userid = ? and premium = ? ", userid, "no").Select()
+
+				if err != nil {
+					return nil, errors.New("Failed to query videos")
+				}
+			}
+		} else {
+			if sort == "" {
+				err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("userid = ? and premium = ? and visibility = ?", userid, "no", "public").Select()
+
+				if err != nil {
+					return nil, errors.New("Failed to query videos")
+				}
+			} else if sort == "old" {
+				err := r.DB.Model(&videos).Order("year ASC", "month ASC", "day ASC").Where("userid = ? and premium = ? and visibility = ?", userid, "no", "public").Select()
+
+				if err != nil {
+					return nil, errors.New("Failed to query videos")
+				}
+			} else if sort == "view" {
+				err := r.DB.Model(&videos).Order("view DESC").Where("userid = ? and premium = ? and visibility = ?", userid, "no", "public").Select()
+
+				if err != nil {
+					return nil, errors.New("Failed to query videos")
+				}
+			}
 		}
 	}
-
 
 	return videos, nil
 }
@@ -1513,6 +1649,32 @@ func (r *queryResolver) CommentByID(ctx context.Context, id int) ([]*model.Comme
 	return comments, nil
 }
 
+func (r *queryResolver) VideosByUsers(ctx context.Context, id string, premium string) ([]*model.Video, error) {
+	var videos []*model.Video
+
+	var s []string
+	s = strings.Split(id, ",")
+
+	if premium == "yes" {
+		_, err := r.DB.Query(&videos, `SELECT * FROM videos WHERE userid IN (?) AND videos.visibility = (?) ORDER BY videos.year DESC`, pg.Strings(s), "public")
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("Failed to query videos")
+		}
+	} else {
+		_, err := r.DB.Query(&videos, `SELECT * FROM videos WHERE userid IN (?) AND videos.visibility = (?) AND videos.premium = (?) ORDER BY videos.year DESC, videos.month DESC, videos.day DESC`, pg.Strings(s), "public", "no")
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("Failed to query videos")
+		}
+	}
+
+
+
+	return videos, nil
+
+}
+
 func (r *queryResolver) UsersByIds(ctx context.Context, id string) ([]*model.User, error) {
 	var users []*model.User
 
@@ -1520,10 +1682,10 @@ func (r *queryResolver) UsersByIds(ctx context.Context, id string) ([]*model.Use
 	//var idArr = []int64{}
 
 	//for _, i := range s {
-		//j, err := strconv.ParseInt(i, 10, 64)
-		//if err != nil {
-		//	log.Println(err)
-		//}
+	//j, err := strconv.ParseInt(i, 10, 64)
+	//if err != nil {
+	//	log.Println(err)
+	//}
 
 	//	idArr = append(idArr, j)
 	//}

@@ -19,6 +19,10 @@ type User {
   day: Int!
   month: Int!
   year: Int!
+  premiday: Int!
+  premimonth: Int!
+  premiyear: Int!
+  premitype: String!
 }
 
 type Post {
@@ -63,6 +67,8 @@ type Video {
   day: Int!
   month: Int!
   year: Int!
+  duration: Int!
+  premium: String!
 }
 
 type Link {
@@ -126,19 +132,21 @@ type Query {
   commentByPost(id: Int!): [Comment!]!
   linkByUser(userid: String!): [Link!]!
   users: [User!]!
-  videos(sort: String!): [Video!]!
+  videos(sort: String!, filter: String!, premium: String!): [Video!]!
   comments: [Comment!]!
   commentsByVideo(videoid: Int!, sort: String!): [Comment!]!
   replies(replyto: Int!): [Comment!]!
   playlists: [Playlist!]!
   playlistsByUser(userid: String!): [Playlist!]!
-  videosByUser(userid: String!, sort: String!): [Video!]!
+  videosByUser(userid: String!, sort: String!, premium: String!, privacy: String!): [Video!]!
   videosByCategory(category: String!): [Video!]!
   userById(userid: String!): [User!]!
   videoById(id: Int!): [Video!]!
   playlistById(id: Int!): [Playlist!]!
   videosByIds(id: String!): [Video!]!
   commentById(id: Int!): [Comment!]!
+
+  videosByUsers(id: String!, premium: String!): [Video!]!
 
   usersByIds(id: String!): [User!]!
 
@@ -162,6 +170,10 @@ input newUser {
   day: Int!
   month: Int!
   year: Int!
+  premiday: Int!
+  premimonth: Int!
+  premiyear: Int!
+  premitype: String!
 }
 
 input newPlaylist {
@@ -198,6 +210,8 @@ input newVideo {
   day: Int!
   month: Int!
   year: Int!
+  duration: Int!
+  premium: String!
 }
 
 type Mutation {
@@ -224,6 +238,8 @@ type Mutation {
 
   viewVideo (id: ID!): Video!
   viewPlaylist (id: ID!): Playlist!
+
+  makeUserPremium(id: String!, subType:String!): User!
 
   subscribe (id: String!, chnid: String!): User!
   likevid (id: String!, chnid: String!): User!
