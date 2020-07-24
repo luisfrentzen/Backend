@@ -1308,6 +1308,7 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	err := r.DB.Model(&users).Order("id").Select()
 
 	if err != nil {
+		log.Println(err)
 		return nil, errors.New("Failed to query users")
 	} else {
 		log.Println("Get Users Succeed")
@@ -1364,7 +1365,7 @@ func (r *queryResolver) Videos(ctx context.Context, sort string, filter string, 
 					return nil, errors.New("Failed to query videos")
 				}
 			} else {
-				err := r.DB.Model(&videos).Order("view DESC").Where("restriction = ? and visibility = ? and premium - ?", "all", "public", "no").Select()
+				err := r.DB.Model(&videos).Order("view DESC").Where("restriction = ? and visibility = ? and premium = ?", "all", "public", "no").Select()
 
 				if err != nil {
 					log.Println(err)
