@@ -23,6 +23,7 @@ type User {
   premimonth: Int!
   premiyear: Int!
   premitype: String!
+  archivedplaylists: String!
 }
 
 type Post {
@@ -174,6 +175,7 @@ input newUser {
   premimonth: Int!
   premiyear: Int!
   premitype: String!
+  archivedplaylists: String!
 }
 
 input newPlaylist {
@@ -248,6 +250,9 @@ type Mutation {
   disilikecom (id: String!, chnid: String!): User!
   likepost (id: String!, chnid: String!): User!
   disilikepost (id: String!, chnid: String!): User!
+
+  archiveplaylist(id: String!, plid: ID!): User!
+  removearchivedplaylist(id: String!, plid: ID!): User!
 
   editAbout (id: String!, about: String!): User!
   updateLink (id: Int!, label: String!, url: String!): Link!

@@ -66,38 +66,40 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddToPlaylist         func(childComplexity int, id string, input *model.AddToPlaylist) int
-		CreateComment         func(childComplexity int, input *model.NewComment) int
-		CreateLink            func(childComplexity int, input *model.NewLink) int
-		CreatePlaylist        func(childComplexity int, input *model.NewPlaylist) int
-		CreatePost            func(childComplexity int, input *model.NewPost) int
-		CreateUser            func(childComplexity int, input *model.NewUser) int
-		CreateVideo           func(childComplexity int, input *model.NewVideo) int
-		DeleteLink            func(childComplexity int, id int) int
-		DeletePost            func(childComplexity int, id int) int
-		DeleteUser            func(childComplexity int, id string) int
-		DeleteVideo           func(childComplexity int, id string) int
-		Disilikecom           func(childComplexity int, id string, chnid string) int
-		Disilikepost          func(childComplexity int, id string, chnid string) int
-		Disilikevid           func(childComplexity int, id string, chnid string) int
-		EditAbout             func(childComplexity int, id string, about string) int
-		EditPlaylist          func(childComplexity int, id string, title string, visibility string, desc string) int
-		Likecom               func(childComplexity int, id string, chnid string) int
-		Likepost              func(childComplexity int, id string, chnid string) int
-		Likevid               func(childComplexity int, id string, chnid string) int
-		MakeUserPremium       func(childComplexity int, id string, subType string) int
-		RemoveAllFromPlaylist func(childComplexity int, id string) int
-		RemoveFromPlaylist    func(childComplexity int, id string, videoid int) int
-		Subscribe             func(childComplexity int, id string, chnid string) int
-		UpdateLink            func(childComplexity int, id int, label string, url string) int
-		UpdatePlaylist        func(childComplexity int, id string, input *model.NewPlaylist) int
-		UpdatePost            func(childComplexity int, id int, desc string) int
-		UpdateUser            func(childComplexity int, id string, input *model.NewUser) int
-		UpdateVideo           func(childComplexity int, id string, input *model.NewVideo) int
-		Updatechannelart      func(childComplexity int, id string, channelart string) int
-		Updateprofilepic      func(childComplexity int, id string, profilepic string) int
-		ViewPlaylist          func(childComplexity int, id string) int
-		ViewVideo             func(childComplexity int, id string) int
+		AddToPlaylist          func(childComplexity int, id string, input *model.AddToPlaylist) int
+		Archiveplaylist        func(childComplexity int, id string, plid string) int
+		CreateComment          func(childComplexity int, input *model.NewComment) int
+		CreateLink             func(childComplexity int, input *model.NewLink) int
+		CreatePlaylist         func(childComplexity int, input *model.NewPlaylist) int
+		CreatePost             func(childComplexity int, input *model.NewPost) int
+		CreateUser             func(childComplexity int, input *model.NewUser) int
+		CreateVideo            func(childComplexity int, input *model.NewVideo) int
+		DeleteLink             func(childComplexity int, id int) int
+		DeletePost             func(childComplexity int, id int) int
+		DeleteUser             func(childComplexity int, id string) int
+		DeleteVideo            func(childComplexity int, id string) int
+		Disilikecom            func(childComplexity int, id string, chnid string) int
+		Disilikepost           func(childComplexity int, id string, chnid string) int
+		Disilikevid            func(childComplexity int, id string, chnid string) int
+		EditAbout              func(childComplexity int, id string, about string) int
+		EditPlaylist           func(childComplexity int, id string, title string, visibility string, desc string) int
+		Likecom                func(childComplexity int, id string, chnid string) int
+		Likepost               func(childComplexity int, id string, chnid string) int
+		Likevid                func(childComplexity int, id string, chnid string) int
+		MakeUserPremium        func(childComplexity int, id string, subType string) int
+		RemoveAllFromPlaylist  func(childComplexity int, id string) int
+		RemoveFromPlaylist     func(childComplexity int, id string, videoid int) int
+		Removearchivedplaylist func(childComplexity int, id string, plid string) int
+		Subscribe              func(childComplexity int, id string, chnid string) int
+		UpdateLink             func(childComplexity int, id int, label string, url string) int
+		UpdatePlaylist         func(childComplexity int, id string, input *model.NewPlaylist) int
+		UpdatePost             func(childComplexity int, id int, desc string) int
+		UpdateUser             func(childComplexity int, id string, input *model.NewUser) int
+		UpdateVideo            func(childComplexity int, id string, input *model.NewVideo) int
+		Updatechannelart       func(childComplexity int, id string, channelart string) int
+		Updateprofilepic       func(childComplexity int, id string, profilepic string) int
+		ViewPlaylist           func(childComplexity int, id string) int
+		ViewVideo              func(childComplexity int, id string) int
 	}
 
 	Playlist struct {
@@ -150,6 +152,7 @@ type ComplexityRoot struct {
 
 	User struct {
 		About             func(childComplexity int) int
+		Archivedplaylists func(childComplexity int) int
 		Channelart        func(childComplexity int) int
 		Day               func(childComplexity int) int
 		Disilikedcomments func(childComplexity int) int
@@ -222,6 +225,8 @@ type MutationResolver interface {
 	Disilikecom(ctx context.Context, id string, chnid string) (*model.User, error)
 	Likepost(ctx context.Context, id string, chnid string) (*model.User, error)
 	Disilikepost(ctx context.Context, id string, chnid string) (*model.User, error)
+	Archiveplaylist(ctx context.Context, id string, plid string) (*model.User, error)
+	Removearchivedplaylist(ctx context.Context, id string, plid string) (*model.User, error)
 	EditAbout(ctx context.Context, id string, about string) (*model.User, error)
 	UpdateLink(ctx context.Context, id int, label string, url string) (*model.Link, error)
 	DeleteLink(ctx context.Context, id int) (bool, error)
@@ -391,6 +396,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.AddToPlaylist(childComplexity, args["id"].(string), args["input"].(*model.AddToPlaylist)), true
+
+	case "Mutation.archiveplaylist":
+		if e.complexity.Mutation.Archiveplaylist == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_archiveplaylist_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Archiveplaylist(childComplexity, args["id"].(string), args["plid"].(string)), true
 
 	case "Mutation.createComment":
 		if e.complexity.Mutation.CreateComment == nil {
@@ -643,6 +660,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RemoveFromPlaylist(childComplexity, args["id"].(string), args["videoid"].(int)), true
+
+	case "Mutation.removearchivedplaylist":
+		if e.complexity.Mutation.Removearchivedplaylist == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_removearchivedplaylist_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Removearchivedplaylist(childComplexity, args["id"].(string), args["plid"].(string)), true
 
 	case "Mutation.subscribe":
 		if e.complexity.Mutation.Subscribe == nil {
@@ -1129,6 +1158,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.About(childComplexity), true
 
+	case "User.archivedplaylists":
+		if e.complexity.User.Archivedplaylists == nil {
+			break
+		}
+
+		return e.complexity.User.Archivedplaylists(childComplexity), true
+
 	case "User.channelart":
 		if e.complexity.User.Channelart == nil {
 			break
@@ -1498,6 +1534,7 @@ type User {
   premimonth: Int!
   premiyear: Int!
   premitype: String!
+  archivedplaylists: String!
 }
 
 type Post {
@@ -1649,6 +1686,7 @@ input newUser {
   premimonth: Int!
   premiyear: Int!
   premitype: String!
+  archivedplaylists: String!
 }
 
 input newPlaylist {
@@ -1724,6 +1762,9 @@ type Mutation {
   likepost (id: String!, chnid: String!): User!
   disilikepost (id: String!, chnid: String!): User!
 
+  archiveplaylist(id: String!, plid: ID!): User!
+  removearchivedplaylist(id: String!, plid: ID!): User!
+
   editAbout (id: String!, about: String!): User!
   updateLink (id: Int!, label: String!, url: String!): Link!
   deleteLink (id: Int!): Boolean!
@@ -1761,6 +1802,28 @@ func (ec *executionContext) field_Mutation_addToPlaylist_args(ctx context.Contex
 		}
 	}
 	args["input"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_archiveplaylist_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["plid"]; ok {
+		arg1, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["plid"] = arg1
 	return args, nil
 }
 
@@ -2151,6 +2214,28 @@ func (ec *executionContext) field_Mutation_removeFromPlaylist_args(ctx context.C
 		}
 	}
 	args["videoid"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_removearchivedplaylist_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["plid"]; ok {
+		arg1, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["plid"] = arg1
 	return args, nil
 }
 
@@ -4271,6 +4356,88 @@ func (ec *executionContext) _Mutation_disilikepost(ctx context.Context, field gr
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().Disilikepost(rctx, args["id"].(string), args["chnid"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖBackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_archiveplaylist(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_archiveplaylist_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Archiveplaylist(rctx, args["id"].(string), args["plid"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖBackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_removearchivedplaylist(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_removearchivedplaylist_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Removearchivedplaylist(rctx, args["id"].(string), args["plid"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6802,6 +6969,40 @@ func (ec *executionContext) _User_premitype(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _User_archivedplaylists(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Archivedplaylists, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Video_id(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -8921,6 +9122,12 @@ func (ec *executionContext) unmarshalInputnewUser(ctx context.Context, obj inter
 			if err != nil {
 				return it, err
 			}
+		case "archivedplaylists":
+			var err error
+			it.Archivedplaylists, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -9322,6 +9529,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "disilikepost":
 			out.Values[i] = ec._Mutation_disilikepost(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "archiveplaylist":
+			out.Values[i] = ec._Mutation_archiveplaylist(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "removearchivedplaylist":
+			out.Values[i] = ec._Mutation_removearchivedplaylist(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -9933,6 +10150,11 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "premitype":
 			out.Values[i] = ec._User_premitype(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "archivedplaylists":
+			out.Values[i] = ec._User_archivedplaylists(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

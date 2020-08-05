@@ -8,6 +8,7 @@ import (
 	"Backend/graph/model"
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -1092,6 +1093,62 @@ func (r *mutationResolver) Disilikepost(ctx context.Context, id string, chnid st
 	}
 
 	return &user, nil
+}
+
+func (r *mutationResolver) Archiveplaylist(ctx context.Context, id string, plid string) (*model.User, error) {
+	var user model.User
+
+	log.Println("Getting User")
+
+	err := r.DB.Model(&user).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	s := strings.Split(user.Archivedplaylists, ",")
+
+	if s[0] == "" {
+		user.Archivedplaylists = plid
+
+	} else {
+		var liked = false
+
+		for idx, i := range s {
+			if i == plid {
+				//log.Println(len(s))
+				if len(s) == 1 {
+					s = nil
+				} else {
+					s = append(s[:idx], s[idx+1:]...)
+				}
+
+				liked = true
+				break
+			}
+		}
+
+		if liked == false {
+			s = append(s, plid)
+		}
+
+		user.Archivedplaylists = strings.Join(s, ",")
+
+	}
+
+	_, updateErr := r.DB.Model(&user).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
+	}
+
+	return &user, nil
+}
+
+func (r *mutationResolver) Removearchivedplaylist(ctx context.Context, id string, plid string) (*model.User, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) EditAbout(ctx context.Context, id string, about string) (*model.User, error) {

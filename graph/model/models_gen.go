@@ -71,6 +71,7 @@ type User struct {
 	Premimonth        int    `json:"premimonth"`
 	Premiyear         int    `json:"premiyear"`
 	Premitype         string `json:"premitype"`
+	Archivedplaylists string `json:"archivedplaylists"`
 }
 
 type Video struct {
@@ -165,6 +166,7 @@ type NewUser struct {
 	Premimonth        int    `json:"premimonth"`
 	Premiyear         int    `json:"premiyear"`
 	Premitype         string `json:"premitype"`
+	Archivedplaylists string `json:"archivedplaylists"`
 }
 
 type NewVideo struct {
