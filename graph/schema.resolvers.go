@@ -1458,7 +1458,7 @@ func (r *queryResolver) Playlists(ctx context.Context) ([]*model.Playlist, error
 func (r *queryResolver) PlaylistsByUser(ctx context.Context, userid string, visibility string) ([]*model.Playlist, error) {
 	var playlists []*model.Playlist
 
-	err := r.DB.Model(&playlists).Order("year DESC", "month DESC", "day DESC").Where("userid = ? and visibility != ?", userid, visibility).Select()
+	err := r.DB.Model(&playlists).Order("visibility DESC").Where("userid = ? and visibility != ?", userid, visibility).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlists")
