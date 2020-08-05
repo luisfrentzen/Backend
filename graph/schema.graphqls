@@ -137,7 +137,7 @@ type Query {
   commentsByVideo(videoid: Int!, sort: String!): [Comment!]!
   replies(replyto: Int!): [Comment!]!
   playlists: [Playlist!]!
-  playlistsByUser(userid: String!): [Playlist!]!
+  playlistsByUser(userid: String!, visibility: String!): [Playlist!]!
   videosByUser(userid: String!, sort: String!, premium: String!, privacy: String!): [Video!]!
   videosByCategory(category: String!): [Video!]!
   userById(userid: String!): [User!]!

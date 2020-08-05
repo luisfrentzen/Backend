@@ -1323,14 +1323,14 @@ func (r *queryResolver) Videos(ctx context.Context, sort string, filter string, 
 	if premium == "yes" {
 		if sort == "view" {
 			if filter == "all" {
-				err := r.DB.Model(&videos).Order("view DESC").Where("visibility = ?" , "public").Select()
+				err := r.DB.Model(&videos).Order("view DESC").Where("visibility = ?", "public").Select()
 
 				if err != nil {
 					log.Println(err)
 					return nil, errors.New("Failed to query videos")
 				}
 			} else {
-				err := r.DB.Model(&videos).Order("view DESC").Where("restriction = ? and visibility = ? ", "all", "public", ).Select()
+				err := r.DB.Model(&videos).Order("view DESC").Where("restriction = ? and visibility = ? ", "all", "public").Select()
 
 				if err != nil {
 					log.Println(err)
@@ -1455,10 +1455,10 @@ func (r *queryResolver) Playlists(ctx context.Context) ([]*model.Playlist, error
 	return playlists, nil
 }
 
-func (r *queryResolver) PlaylistsByUser(ctx context.Context, userid string) ([]*model.Playlist, error) {
+func (r *queryResolver) PlaylistsByUser(ctx context.Context, userid string, visibility string) ([]*model.Playlist, error) {
 	var playlists []*model.Playlist
 
-	err := r.DB.Model(&playlists).Order("year DESC", "month DESC", "day DESC").Where("userid = ?", userid).Select()
+	err := r.DB.Model(&playlists).Order("year DESC", "month DESC", "day DESC").Where("userid = ? and visibility = ?", userid, visibility).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlists")
@@ -1670,10 +1670,7 @@ func (r *queryResolver) VideosByUsers(ctx context.Context, id string, premium st
 		}
 	}
 
-
-
 	return videos, nil
-
 }
 
 func (r *queryResolver) UsersByIds(ctx context.Context, id string) ([]*model.User, error) {

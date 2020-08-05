@@ -133,7 +133,7 @@ type ComplexityRoot struct {
 		LinkByUser       func(childComplexity int, userid string) int
 		PlaylistByID     func(childComplexity int, id int) int
 		Playlists        func(childComplexity int) int
-		PlaylistsByUser  func(childComplexity int, userid string) int
+		PlaylistsByUser  func(childComplexity int, userid string, visibility string) int
 		PostByID         func(childComplexity int, id int) int
 		PostByUser       func(childComplexity int, userid string) int
 		Replies          func(childComplexity int, replyto int) int
@@ -241,7 +241,7 @@ type QueryResolver interface {
 	CommentsByVideo(ctx context.Context, videoid int, sort string) ([]*model.Comment, error)
 	Replies(ctx context.Context, replyto int) ([]*model.Comment, error)
 	Playlists(ctx context.Context) ([]*model.Playlist, error)
-	PlaylistsByUser(ctx context.Context, userid string) ([]*model.Playlist, error)
+	PlaylistsByUser(ctx context.Context, userid string, visibility string) ([]*model.Playlist, error)
 	VideosByUser(ctx context.Context, userid string, sort string, premium string, privacy string) ([]*model.Video, error)
 	VideosByCategory(ctx context.Context, category string) ([]*model.Video, error)
 	UserByID(ctx context.Context, userid string) ([]*model.User, error)
@@ -981,7 +981,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.PlaylistsByUser(childComplexity, args["userid"].(string)), true
+		return e.complexity.Query.PlaylistsByUser(childComplexity, args["userid"].(string), args["visibility"].(string)), true
 
 	case "Query.postById":
 		if e.complexity.Query.PostByID == nil {
@@ -1612,7 +1612,7 @@ type Query {
   commentsByVideo(videoid: Int!, sort: String!): [Comment!]!
   replies(replyto: Int!): [Comment!]!
   playlists: [Playlist!]!
-  playlistsByUser(userid: String!): [Playlist!]!
+  playlistsByUser(userid: String!, visibility: String!): [Playlist!]!
   videosByUser(userid: String!, sort: String!, premium: String!, privacy: String!): [Video!]!
   videosByCategory(category: String!): [Video!]!
   userById(userid: String!): [User!]!
@@ -2469,6 +2469,14 @@ func (ec *executionContext) field_Query_playlistsByUser_args(ctx context.Context
 		}
 	}
 	args["userid"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["visibility"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["visibility"] = arg1
 	return args, nil
 }
 
@@ -5625,7 +5633,7 @@ func (ec *executionContext) _Query_playlistsByUser(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().PlaylistsByUser(rctx, args["userid"].(string))
+		return ec.resolvers.Query().PlaylistsByUser(rctx, args["userid"].(string), args["visibility"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
