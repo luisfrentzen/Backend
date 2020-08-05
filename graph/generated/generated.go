@@ -128,26 +128,27 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		CommentByID      func(childComplexity int, id int) int
-		CommentByPost    func(childComplexity int, id int) int
-		Comments         func(childComplexity int) int
-		CommentsByVideo  func(childComplexity int, videoid int, sort string) int
-		LinkByUser       func(childComplexity int, userid string) int
-		PlaylistByID     func(childComplexity int, id int) int
-		Playlists        func(childComplexity int) int
-		PlaylistsByUser  func(childComplexity int, userid string, visibility string) int
-		PostByID         func(childComplexity int, id int) int
-		PostByUser       func(childComplexity int, userid string) int
-		Replies          func(childComplexity int, replyto int) int
-		UserByID         func(childComplexity int, userid string) int
-		Users            func(childComplexity int) int
-		UsersByIds       func(childComplexity int, id string) int
-		VideoByID        func(childComplexity int, id int) int
-		Videos           func(childComplexity int, sort string, filter string, premium string) int
-		VideosByCategory func(childComplexity int, category string) int
-		VideosByIds      func(childComplexity int, id string) int
-		VideosByUser     func(childComplexity int, userid string, sort string, premium string, privacy string) int
-		VideosByUsers    func(childComplexity int, id string, premium string) int
+		CommentByID         func(childComplexity int, id int) int
+		CommentByPost       func(childComplexity int, id int) int
+		Comments            func(childComplexity int) int
+		CommentsByVideo     func(childComplexity int, videoid int, sort string) int
+		GetArchivedPlaylist func(childComplexity int, ids string) int
+		LinkByUser          func(childComplexity int, userid string) int
+		PlaylistByID        func(childComplexity int, id int) int
+		Playlists           func(childComplexity int) int
+		PlaylistsByUser     func(childComplexity int, userid string, visibility string) int
+		PostByID            func(childComplexity int, id int) int
+		PostByUser          func(childComplexity int, userid string) int
+		Replies             func(childComplexity int, replyto int) int
+		UserByID            func(childComplexity int, userid string) int
+		Users               func(childComplexity int) int
+		UsersByIds          func(childComplexity int, id string) int
+		VideoByID           func(childComplexity int, id int) int
+		Videos              func(childComplexity int, sort string, filter string, premium string) int
+		VideosByCategory    func(childComplexity int, category string) int
+		VideosByIds         func(childComplexity int, id string) int
+		VideosByUser        func(childComplexity int, userid string, sort string, premium string, privacy string) int
+		VideosByUsers       func(childComplexity int, id string, premium string) int
 	}
 
 	User struct {
@@ -256,6 +257,7 @@ type QueryResolver interface {
 	CommentByID(ctx context.Context, id int) ([]*model.Comment, error)
 	VideosByUsers(ctx context.Context, id string, premium string) ([]*model.Video, error)
 	UsersByIds(ctx context.Context, id string) ([]*model.User, error)
+	GetArchivedPlaylist(ctx context.Context, ids string) ([]*model.Playlist, error)
 }
 
 type executableSchema struct {
@@ -969,6 +971,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.CommentsByVideo(childComplexity, args["videoid"].(int), args["sort"].(string)), true
 
+	case "Query.getArchivedPlaylist":
+		if e.complexity.Query.GetArchivedPlaylist == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getArchivedPlaylist_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetArchivedPlaylist(childComplexity, args["ids"].(string)), true
+
 	case "Query.linkByUser":
 		if e.complexity.Query.LinkByUser == nil {
 			break
@@ -1662,6 +1676,7 @@ type Query {
 
   usersByIds(id: String!): [User!]!
 
+  getArchivedPlaylist(ids: String!): [Playlist!]!
 }
 
 input newUser {
@@ -2512,6 +2527,20 @@ func (ec *executionContext) field_Query_commentsByVideo_args(ctx context.Context
 		}
 	}
 	args["sort"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getArchivedPlaylist_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["ids"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ids"] = arg0
 	return args, nil
 }
 
@@ -6184,6 +6213,47 @@ func (ec *executionContext) _Query_usersByIds(ctx context.Context, field graphql
 	res := resTmp.([]*model.User)
 	fc.Result = res
 	return ec.marshalNUser2ᚕᚖBackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getArchivedPlaylist(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getArchivedPlaylist_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetArchivedPlaylist(rctx, args["ids"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Playlist)
+	fc.Result = res
+	return ec.marshalNPlaylist2ᚕᚖBackendᚋgraphᚋmodelᚐPlaylistᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -10017,6 +10087,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_usersByIds(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getArchivedPlaylist":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getArchivedPlaylist(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

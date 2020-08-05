@@ -1756,6 +1756,32 @@ func (r *queryResolver) UsersByIds(ctx context.Context, id string) ([]*model.Use
 	return users, nil
 }
 
+func (r *queryResolver) GetArchivedPlaylist(ctx context.Context, ids string) ([]*model.Playlist, error) {
+	var playlists []*model.Playlist
+
+	s := strings.Split(ids, ",")
+	var idArr = []int64{}
+
+	for _, i := range s {
+	j, err := strconv.ParseInt(i, 10, 64)
+	if err != nil {
+		log.Println(err)
+	}
+
+		idArr = append(idArr, j)
+	}
+
+	_, err := r.DB.Query(&playlists, `SELECT * FROM users WHERE id IN (?)`, pg.Strings(s))
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Failed to query video")
+	} else {
+		log.Println("Get Video By Id Succeed")
+	}
+	return playlists, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

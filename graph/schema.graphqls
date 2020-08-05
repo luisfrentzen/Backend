@@ -151,6 +151,7 @@ type Query {
 
   usersByIds(id: String!): [User!]!
 
+  getArchivedPlaylist(ids: String!): [Playlist!]!
 }
 
 input newUser {
