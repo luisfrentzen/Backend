@@ -1771,7 +1771,7 @@ func (r *queryResolver) GetArchivedPlaylist(ctx context.Context, ids string) ([]
 		idArr = append(idArr, j)
 	}
 
-	_, err := r.DB.Query(&playlists, `SELECT * FROM users WHERE id IN (?)`, pg.Strings(s))
+	_, err := r.DB.Query(&playlists, `SELECT * FROM users WHERE id IN (?)`, pg.Ints(idArr))
 
 	if err != nil {
 		log.Println(err)
