@@ -19,7 +19,7 @@ import (
 )
 
 func (r *mutationResolver) ShuffleVideos(ctx context.Context, plid string) (*model.Playlist, error) {
-	var playlist *model.Playlist
+	var playlist model.Playlist
 
 	err := r.DB.Model(&playlist).Where("id = ?", plid).First()
 
@@ -31,7 +31,7 @@ func (r *mutationResolver) ShuffleVideos(ctx context.Context, plid string) (*mod
 	s := strings.Split(playlist.Videos, ",")
 
 	if len(s) < 2 {
-		return playlist, nil
+		return &playlist, nil
 	}
 
 	rand.Seed(time.Now().UnixNano())
@@ -46,7 +46,7 @@ func (r *mutationResolver) ShuffleVideos(ctx context.Context, plid string) (*mod
 		return nil, errors.New("Update user failed")
 	}
 
-	return playlist, nil
+	return &playlist, nil
 }
 
 func (r *mutationResolver) CreateLink(ctx context.Context, input *model.NewLink) (*model.Link, error) {
