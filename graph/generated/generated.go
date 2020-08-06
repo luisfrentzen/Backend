@@ -90,6 +90,7 @@ type ComplexityRoot struct {
 		RemoveAllFromPlaylist  func(childComplexity int, id string) int
 		RemoveFromPlaylist     func(childComplexity int, id string, videoid int) int
 		Removearchivedplaylist func(childComplexity int, id string, plid string) int
+		ShuffleVideos          func(childComplexity int, plid string) int
 		Subscribe              func(childComplexity int, id string, chnid string) int
 		UpdateLink             func(childComplexity int, id int, label string, url string) int
 		UpdatePlaylist         func(childComplexity int, id string, input *model.NewPlaylist) int
@@ -201,6 +202,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
+	ShuffleVideos(ctx context.Context, plid string) (*model.Playlist, error)
 	CreateLink(ctx context.Context, input *model.NewLink) (*model.Link, error)
 	CreatePost(ctx context.Context, input *model.NewPost) (*model.Post, error)
 	CreateUser(ctx context.Context, input *model.NewUser) (*model.User, error)
@@ -674,6 +676,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Removearchivedplaylist(childComplexity, args["id"].(string), args["plid"].(string)), true
+
+	case "Mutation.shuffleVideos":
+		if e.complexity.Mutation.ShuffleVideos == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_shuffleVideos_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ShuffleVideos(childComplexity, args["plid"].(string)), true
 
 	case "Mutation.subscribe":
 		if e.complexity.Mutation.Subscribe == nil {
@@ -1743,6 +1757,7 @@ input newVideo {
 }
 
 type Mutation {
+  shuffleVideos(plid: ID!): Playlist!
   createLink (input: newLink): Link!
 
   createPost (input: newPost): Post!
@@ -2251,6 +2266,20 @@ func (ec *executionContext) field_Mutation_removearchivedplaylist_args(ctx conte
 		}
 	}
 	args["plid"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_shuffleVideos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["plid"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["plid"] = arg0
 	return args, nil
 }
 
@@ -3374,6 +3403,47 @@ func (ec *executionContext) _Link_userid(ctx context.Context, field graphql.Coll
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_shuffleVideos(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_shuffleVideos_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ShuffleVideos(rctx, args["plid"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Playlist)
+	fc.Result = res
+	return ec.marshalNPlaylist2ᚖBackendᚋgraphᚋmodelᚐPlaylist(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createLink(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -9477,6 +9547,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
+		case "shuffleVideos":
+			out.Values[i] = ec._Mutation_shuffleVideos(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "createLink":
 			out.Values[i] = ec._Mutation_createLink(ctx, field)
 			if out.Values[i] == graphql.Null {

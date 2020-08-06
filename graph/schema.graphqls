@@ -218,6 +218,7 @@ input newVideo {
 }
 
 type Mutation {
+  shuffleVideos(plid: ID!): Playlist!
   createLink (input: newLink): Link!
 
   createPost (input: newPost): Post!

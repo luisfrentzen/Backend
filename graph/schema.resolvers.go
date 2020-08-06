@@ -10,12 +10,44 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
 
 	pg "github.com/go-pg/pg/v10"
 )
+
+func (r *mutationResolver) ShuffleVideos(ctx context.Context, plid string) (*model.Playlist, error) {
+	var playlist *model.Playlist
+
+	err := r.DB.Model(&playlist).Where("id = ?", plid).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	s := strings.Split(playlist.Videos, ",")
+
+	if len(s) < 2 {
+		return playlist, nil
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(s), func(i, j int) { s[i], s[j] = s[j], s[i] })
+
+	playlist.Videos = strings.Join(s, ",")
+
+	_, updateErr := r.DB.Model(&playlist).Where("id = ?", plid).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
+	}
+
+	return playlist, nil
+}
 
 func (r *mutationResolver) CreateLink(ctx context.Context, input *model.NewLink) (*model.Link, error) {
 	link := model.Link{
@@ -1763,10 +1795,10 @@ func (r *queryResolver) GetArchivedPlaylist(ctx context.Context, ids string) ([]
 	var idArr = []int64{}
 
 	for _, i := range s {
-	j, err := strconv.ParseInt(i, 10, 64)
-	if err != nil {
-		log.Println(err)
-	}
+		j, err := strconv.ParseInt(i, 10, 64)
+		if err != nil {
+			log.Println(err)
+		}
 
 		idArr = append(idArr, j)
 	}
