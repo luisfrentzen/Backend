@@ -1716,7 +1716,7 @@ func (r *queryResolver) VideosByIds(ctx context.Context, id string) ([]*model.Vi
 		idArr = append(idArr, j)
 	}
 
-	_, err := r.DB.Query(&videos, `SELECT * FROM videos WHERE id IN (?)`, pg.Ints(idArr))
+	_, err := r.DB.Query(&videos, `SELECT * FROM videos WHERE id IN (?) ORDER BY videos.view ASC`, pg.Ints(idArr))
 
 	if err != nil {
 		log.Println(err)
