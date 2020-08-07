@@ -1292,6 +1292,48 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, id int, desc string) 
 	return &post, nil
 }
 
+func (r *mutationResolver) DeletePlaylist(ctx context.Context, id int) (bool, error) {
+	var pl model.Playlist
+
+	err := r.DB.Model(&pl).Where("id = ?", id).First()
+
+	if err != nil {
+		return false, errors.New("User not found!")
+	}
+
+	_, deleteErr := r.DB.Model(&pl).Where("id = ?", id).Delete()
+
+	if deleteErr != nil {
+		return false, errors.New("Delete user failed")
+	}
+
+	return true, nil
+}
+
+func (r *mutationResolver) UpdatePlaylistSort(ctx context.Context, id int, videos string) (*model.Playlist, error) {
+	var pl model.Playlist
+
+	log.Println("Getting User")
+
+	err := r.DB.Model(&pl).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	pl.Videos = videos
+
+	_, updateErr := r.DB.Model(&pl).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
+	}
+
+	return &pl, nil
+}
+
 func (r *mutationResolver) Updateprofilepic(ctx context.Context, id string, profilepic string) (*model.User, error) {
 	var user model.User
 

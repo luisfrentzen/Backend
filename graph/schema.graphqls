@@ -262,6 +262,8 @@ type Mutation {
 
   deletePost (id: Int!): Boolean!
   updatePost (id: Int!, desc: String!): Post!
+  deletePlaylist(id: Int!): Boolean!
+  updatePlaylistSort(id: Int!, videos: String!): Playlist!
   updateprofilepic (id: String!, profilepic: String!): User!
   updatechannelart (id: String!, channelart: String!): User!
 
