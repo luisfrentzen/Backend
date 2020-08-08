@@ -1292,7 +1292,7 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, id int, desc string) 
 	return &post, nil
 }
 
-func (r *mutationResolver) DeletePlaylist(ctx context.Context, id int) (*model.Playlist, error) {
+func (r *mutationResolver) DeletePlaylist(ctx context.Context, id int) (bool, error) {
 	var pl model.Playlist
 
 	err := r.DB.Model(&pl).Where("id = ?", id).First()

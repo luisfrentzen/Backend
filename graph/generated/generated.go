@@ -237,7 +237,7 @@ type MutationResolver interface {
 	DeleteLink(ctx context.Context, id int) (bool, error)
 	DeletePost(ctx context.Context, id int) (bool, error)
 	UpdatePost(ctx context.Context, id int, desc string) (*model.Post, error)
-	DeletePlaylist(ctx context.Context, id int) (*model.Playlist, error)
+	DeletePlaylist(ctx context.Context, id int) (bool, error)
 	UpdatePlaylistSort(ctx context.Context, id int, videos string) (*model.Playlist, error)
 	Updateprofilepic(ctx context.Context, id string, profilepic string) (*model.User, error)
 	Updatechannelart(ctx context.Context, id string, channelart string) (*model.User, error)
@@ -1829,7 +1829,7 @@ type Mutation {
 
   deletePost (id: Int!): Boolean!
   updatePost (id: Int!, desc: String!): Post!
-  deletePlaylist(id: Int!): Playlist!
+  deletePlaylist(id: Int!): Boolean!
   updatePlaylistSort(id: Int!, videos: String!): Playlist!
   updateprofilepic (id: String!, profilepic: String!): User!
   updatechannelart (id: String!, channelart: String!): User!
@@ -4860,9 +4860,9 @@ func (ec *executionContext) _Mutation_deletePlaylist(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Playlist)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalNPlaylist2ᚖBackendᚋgraphᚋmodelᚐPlaylist(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updatePlaylistSort(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
