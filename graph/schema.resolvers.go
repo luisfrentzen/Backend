@@ -589,7 +589,7 @@ func (r *mutationResolver) MakeUserPremium(ctx context.Context, id string, subTy
 
 	user.Premium = "yes"
 	user.Premitype = subType
-	day, month, year := time.Now().Date()
+	year, month, day := time.Now().Date()
 	user.Premiday = day
 	user.Premimonth = int(month)
 	user.Premiyear = year
@@ -1292,7 +1292,7 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, id int, desc string) 
 	return &post, nil
 }
 
-func (r *mutationResolver) DeletePlaylist(ctx context.Context, id int) (bool, error) {
+func (r *mutationResolver) DeletePlaylist(ctx context.Context, id int) (*model.Playlist, error) {
 	var pl model.Playlist
 
 	err := r.DB.Model(&pl).Where("id = ?", id).First()
