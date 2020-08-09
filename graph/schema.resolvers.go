@@ -1860,9 +1860,9 @@ func (r *queryResolver) SearchPlaylist(ctx context.Context, kword string) ([]*mo
 	var playlists []*model.Playlist
 
 	s := strings.Split(kword, " ")
-	str := strings.Join(s , "%")
+	str := strings.Join(s, "%")
 
-	err := r.DB.Model(&playlists).Where("title LIKE ?", "%" + str + "%").Select()
+	err := r.DB.Model(&playlists).Where("title LIKE ?", "%"+str+"%").Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlists")
@@ -1875,9 +1875,9 @@ func (r *queryResolver) SearchVideo(ctx context.Context, kword string) ([]*model
 	var videos []*model.Video
 
 	s := strings.Split(kword, " ")
-	str := strings.Join(s , "%")
+	str := strings.Join(s, "%")
 
-	err := r.DB.Model(&videos).Where("title LIKE ?", "%" + str + "%").Select()
+	err := r.DB.Model(&videos).Where("title LIKE ?", "%"+str+"%").Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlists")
@@ -1890,15 +1890,55 @@ func (r *queryResolver) SearchChannel(ctx context.Context, kword string) ([]*mod
 	var users []*model.User
 
 	s := strings.Split(kword, " ")
-	str := strings.Join(s , "%")
+	str := strings.Join(s, "%")
 
-	err := r.DB.Model(&users).Where("name LIKE ?", "%" + str + "%").Select()
+	err := r.DB.Model(&users).Where("name LIKE ?", "%"+str+"%").Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlists")
 	}
 
 	return users, nil
+}
+
+func (r *queryResolver) Autocomplete(ctx context.Context, kword string) ([]string, error) {
+	var users []*model.User
+	var playlists []*model.Playlist
+	var videos []*model.Video
+
+	err := r.DB.Model(&users).Where("name LIKE ?", kword+"%").Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query playlists")
+	}
+
+	err2 := r.DB.Model(&playlists).Where("title LIKE ?", kword+"%").Select()
+
+	if err2 != nil {
+		return nil, errors.New("Failed to query playlists")
+	}
+
+	err3 := r.DB.Model(&videos).Where("title LIKE ?", kword+"%").Select()
+
+	if err3 != nil {
+		return nil, errors.New("Failed to query playlists")
+	}
+
+	s := []string{}
+
+	for _, str := range playlists{
+		s = append(s, str.Title)
+	}
+
+	for _, str := range videos{
+		s = append(s, str.Title)
+	}
+
+	for _, str := range users{
+		s = append(s, str.Name)
+	}
+
+	return s, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

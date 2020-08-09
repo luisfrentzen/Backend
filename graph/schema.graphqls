@@ -156,6 +156,8 @@ type Query {
   searchPlaylist(kword: String!): [Playlist!]!
   searchVideo(kword: String!): [Video!]!
   searchChannel(kword: String!): [User!]!
+
+  autocomplete(kword: String!): [String!]!
 }
 
 input newUser {
