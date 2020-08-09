@@ -1859,7 +1859,10 @@ func (r *queryResolver) GetArchivedPlaylist(ctx context.Context, ids string) ([]
 func (r *queryResolver) SearchPlaylist(ctx context.Context, kword string) ([]*model.Playlist, error) {
 	var playlists []*model.Playlist
 
-	err := r.DB.Model(&playlists).Where("title LIKE ?", "%" + kword + "%").Select()
+	s := strings.Split(kword, " ")
+	str := strings.Join(s , "%")
+
+	err := r.DB.Model(&playlists).Where("title LIKE ?", "%" + str + "%").Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlists")
