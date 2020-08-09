@@ -1938,7 +1938,12 @@ func (r *queryResolver) Autocomplete(ctx context.Context, kword string) ([]strin
 		s = append(s, str.Name)
 	}
 
-	return s, nil
+	limit := 7
+	if len(s) < 7 {
+		limit = len(s)
+	}
+
+	return s[:limit], nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
