@@ -1856,6 +1856,26 @@ func (r *queryResolver) GetArchivedPlaylist(ctx context.Context, ids string) ([]
 	return playlists, nil
 }
 
+func (r *queryResolver) SearchPlaylist(ctx context.Context, kword string) ([]*model.Playlist, error) {
+	var playlists []*model.Playlist
+
+	err := r.DB.Model(&playlists).Where("title LIKE ?", "%" + kword + "%").Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query playlists")
+	}
+
+	return playlists, nil
+}
+
+func (r *queryResolver) SearchVideo(ctx context.Context, kword string) ([]*model.Video, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) SearchChannel(ctx context.Context, kword string) ([]*model.User, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

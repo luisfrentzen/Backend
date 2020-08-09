@@ -152,6 +152,10 @@ type Query {
   usersByIds(id: String!): [User!]!
 
   getArchivedPlaylist(ids: String!): [Playlist!]!
+
+  searchPlaylist(kword: String!): [Playlist!]!
+  searchVideo(kword: String!): [Video!]!
+  searchChannel(kword: String!): [User!]!
 }
 
 input newUser {
