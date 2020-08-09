@@ -1872,11 +1872,33 @@ func (r *queryResolver) SearchPlaylist(ctx context.Context, kword string) ([]*mo
 }
 
 func (r *queryResolver) SearchVideo(ctx context.Context, kword string) ([]*model.Video, error) {
-	panic(fmt.Errorf("not implemented"))
+	var videos []*model.Video
+
+	s := strings.Split(kword, " ")
+	str := strings.Join(s , "%")
+
+	err := r.DB.Model(&videos).Where("title LIKE ?", "%" + str + "%").Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query playlists")
+	}
+
+	return videos, nil
 }
 
 func (r *queryResolver) SearchChannel(ctx context.Context, kword string) ([]*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	var users []*model.User
+
+	s := strings.Split(kword, " ")
+	str := strings.Join(s , "%")
+
+	err := r.DB.Model(&users).Where("name LIKE ?", "%" + str + "%").Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query playlists")
+	}
+
+	return users, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
