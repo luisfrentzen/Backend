@@ -1906,19 +1906,19 @@ func (r *queryResolver) Autocomplete(ctx context.Context, kword string) ([]strin
 	var playlists []*model.Playlist
 	var videos []*model.Video
 
-	err := r.DB.Model(&users).Where("name LIKE ?", kword+"%").Select()
+	err := r.DB.Model(&users).Where("LOWER(name) LIKE LOWER(?)", kword+"%").Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlists")
 	}
 
-	err2 := r.DB.Model(&playlists).Where("title LIKE ?", kword+"%").Select()
+	err2 := r.DB.Model(&playlists).Where("LOWER(title) LIKE LOWER(?)", kword+"%").Select()
 
 	if err2 != nil {
 		return nil, errors.New("Failed to query playlists")
 	}
 
-	err3 := r.DB.Model(&videos).Where("title LIKE ?", kword+"%").Select()
+	err3 := r.DB.Model(&videos).Where("LOWER(title) LIKE LOWER(?)", kword+"%").Select()
 
 	if err3 != nil {
 		return nil, errors.New("Failed to query playlists")
