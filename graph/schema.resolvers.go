@@ -1862,7 +1862,7 @@ func (r *queryResolver) SearchPlaylist(ctx context.Context, kword string) ([]*mo
 	s := strings.Split(kword, " ")
 	str := strings.Join(s, "%")
 
-	err := r.DB.Model(&playlists).Where("title LIKE ? and visibility = ?", "%"+str+"%", "public").Select()
+	err := r.DB.Model(&playlists).Where("LOWER(title) LIKE LOWER(?) and visibility = ?", "%"+str+"%", "public").Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlists")
@@ -1877,7 +1877,7 @@ func (r *queryResolver) SearchVideo(ctx context.Context, kword string) ([]*model
 	s := strings.Split(kword, " ")
 	str := strings.Join(s, "%")
 
-	err := r.DB.Model(&videos).Where("title LIKE ? and visibility = ?", "%"+str+"%", "public").Select()
+	err := r.DB.Model(&videos).Where("LOWER(title) LIKE LOWER(?) and visibility = ?", "%"+str+"%", "public").Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlists")
@@ -1892,7 +1892,7 @@ func (r *queryResolver) SearchChannel(ctx context.Context, kword string) ([]*mod
 	s := strings.Split(kword, " ")
 	str := strings.Join(s, "%")
 
-	err := r.DB.Model(&users).Where("name LIKE ?", "%"+str+"%").Select()
+	err := r.DB.Model(&users).Where("LOWER(name) LIKE LOWER(?)", "%"+str+"%").Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlists")
