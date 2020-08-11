@@ -1694,13 +1694,13 @@ func (r *queryResolver) VideosByCategory(ctx context.Context, category string, s
 	var videos []*model.Video
 
 	if(sortBy == "view"){
-		err := r.DB.Model(&videos).Order("view DESC").Where("category = ? and premi != ?", category, premi).Select()
+		err := r.DB.Model(&videos).Order("view DESC").Where("category = ? and premi != ? and visibility = ?", category, premi, "public").Select()
 
 		if err != nil {
 			return nil, errors.New("Failed to query videos")
 		}
 	} else if (sortBy == "date") {
-		err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("category = ? and premi != ?", category, premi).Select()
+		err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("category = ? and premi != ? and visibility = ?", category, premi, "public").Select()
 
 		if err != nil {
 			return nil, errors.New("Failed to query videos")
