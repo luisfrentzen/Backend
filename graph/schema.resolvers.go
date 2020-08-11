@@ -1690,13 +1690,21 @@ func (r *queryResolver) VideosByUser(ctx context.Context, userid string, sort st
 	return videos, nil
 }
 
-func (r *queryResolver) VideosByCategory(ctx context.Context, category string) ([]*model.Video, error) {
+func (r *queryResolver) VideosByCategory(ctx context.Context, category string, sortBy string, premi string) ([]*model.Video, error) {
 	var videos []*model.Video
 
-	err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("category = ?", category).Select()
+	if(sortBy == "view"){
+		err := r.DB.Model(&videos).Order("view DESC").Where("category = ? and premi != ?", category, premi).Select()
 
-	if err != nil {
-		return nil, errors.New("Failed to query videos")
+		if err != nil {
+			return nil, errors.New("Failed to query videos")
+		}
+	} else if (sortBy == "date") {
+		err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("category = ? and premi != ?", category, premi).Select()
+
+		if err != nil {
+			return nil, errors.New("Failed to query videos")
+		}
 	}
 
 	return videos, nil
@@ -1926,15 +1934,15 @@ func (r *queryResolver) Autocomplete(ctx context.Context, kword string) ([]strin
 
 	s := []string{}
 
-	for _, str := range playlists{
+	for _, str := range playlists {
 		s = append(s, str.Title)
 	}
 
-	for _, str := range videos{
+	for _, str := range videos {
 		s = append(s, str.Title)
 	}
 
-	for _, str := range users{
+	for _, str := range users {
 		s = append(s, str.Name)
 	}
 

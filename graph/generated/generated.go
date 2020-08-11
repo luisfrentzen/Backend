@@ -152,7 +152,7 @@ type ComplexityRoot struct {
 		UsersByIds          func(childComplexity int, id string) int
 		VideoByID           func(childComplexity int, id int) int
 		Videos              func(childComplexity int, sort string, filter string, premium string) int
-		VideosByCategory    func(childComplexity int, category string) int
+		VideosByCategory    func(childComplexity int, category string, sortBy string, premi string) int
 		VideosByIds         func(childComplexity int, id string) int
 		VideosByUser        func(childComplexity int, userid string, sort string, premium string, privacy string) int
 		VideosByUsers       func(childComplexity int, id string, premium string) int
@@ -259,7 +259,7 @@ type QueryResolver interface {
 	Playlists(ctx context.Context) ([]*model.Playlist, error)
 	PlaylistsByUser(ctx context.Context, userid string, visibility string) ([]*model.Playlist, error)
 	VideosByUser(ctx context.Context, userid string, sort string, premium string, privacy string) ([]*model.Video, error)
-	VideosByCategory(ctx context.Context, category string) ([]*model.Video, error)
+	VideosByCategory(ctx context.Context, category string, sortBy string, premi string) ([]*model.Video, error)
 	UserByID(ctx context.Context, userid string) ([]*model.User, error)
 	VideoByID(ctx context.Context, id int) ([]*model.Video, error)
 	PlaylistByID(ctx context.Context, id int) ([]*model.Playlist, error)
@@ -1225,7 +1225,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.VideosByCategory(childComplexity, args["category"].(string)), true
+		return e.complexity.Query.VideosByCategory(childComplexity, args["category"].(string), args["sortBy"].(string), args["premi"].(string)), true
 
 	case "Query.videosByIds":
 		if e.complexity.Query.VideosByIds == nil {
@@ -1763,7 +1763,7 @@ type Query {
   playlists: [Playlist!]!
   playlistsByUser(userid: String!, visibility: String!): [Playlist!]!
   videosByUser(userid: String!, sort: String!, premium: String!, privacy: String!): [Video!]!
-  videosByCategory(category: String!): [Video!]!
+  videosByCategory(category: String!, sortBy: String!, premi: String!): [Video!]!
   userById(userid: String!): [User!]!
   videoById(id: Int!): [Video!]!
   playlistById(id: Int!): [Playlist!]!
@@ -2902,6 +2902,22 @@ func (ec *executionContext) field_Query_videosByCategory_args(ctx context.Contex
 		}
 	}
 	args["category"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["sortBy"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sortBy"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["premi"]; ok {
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["premi"] = arg2
 	return args, nil
 }
 
@@ -6247,7 +6263,7 @@ func (ec *executionContext) _Query_videosByCategory(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().VideosByCategory(rctx, args["category"].(string))
+		return ec.resolvers.Query().VideosByCategory(rctx, args["category"].(string), args["sortBy"].(string), args["premi"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

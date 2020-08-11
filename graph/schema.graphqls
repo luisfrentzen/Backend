@@ -140,7 +140,7 @@ type Query {
   playlists: [Playlist!]!
   playlistsByUser(userid: String!, visibility: String!): [Playlist!]!
   videosByUser(userid: String!, sort: String!, premium: String!, privacy: String!): [Video!]!
-  videosByCategory(category: String!): [Video!]!
+  videosByCategory(category: String!, sortBy: String!, premi: String!): [Video!]!
   userById(userid: String!): [User!]!
   videoById(id: Int!): [Video!]!
   playlistById(id: Int!): [Playlist!]!
