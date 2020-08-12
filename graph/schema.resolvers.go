@@ -1910,21 +1910,7 @@ func (r *queryResolver) SearchChannel(ctx context.Context, kword string) ([]*mod
 }
 
 func (r *queryResolver) Autocomplete(ctx context.Context, kword string) ([]string, error) {
-	var users []*model.User
-	var playlists []*model.Playlist
 	var videos []*model.Video
-
-	err := r.DB.Model(&users).Where("LOWER(name) LIKE LOWER(?)", kword+"%").Select()
-
-	if err != nil {
-		return nil, errors.New("Failed to query playlists")
-	}
-
-	err2 := r.DB.Model(&playlists).Where("LOWER(title) LIKE LOWER(?)", kword+"%").Select()
-
-	if err2 != nil {
-		return nil, errors.New("Failed to query playlists")
-	}
 
 	err3 := r.DB.Model(&videos).Where("LOWER(title) LIKE LOWER(?)", kword+"%").Select()
 
@@ -1934,16 +1920,8 @@ func (r *queryResolver) Autocomplete(ctx context.Context, kword string) ([]strin
 
 	s := []string{}
 
-	for _, str := range playlists {
-		s = append(s, str.Title)
-	}
-
 	for _, str := range videos {
 		s = append(s, str.Title)
-	}
-
-	for _, str := range users {
-		s = append(s, str.Name)
 	}
 
 	limit := 7
