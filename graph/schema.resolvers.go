@@ -96,6 +96,27 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input *model.NewPost)
 	return &post, nil
 }
 
+func (r *mutationResolver) CreateNotif(ctx context.Context, input *model.NewNotification) (*model.Notification, error) {
+	notif := model.Notification{
+		Title:       input.Title,
+		Vidthm: input.Vidthm,
+		Userid: input.Userid,
+	}
+
+	log.Println("Inserting User")
+
+	_, err := r.DB.Model(&notif).Insert()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Insert new user failed")
+	} else {
+		log.Println("Create User Succeed")
+	}
+
+	return &notif, nil
+}
+
 func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser) (*model.User, error) {
 	user := model.User{
 		ID:         input.ID,
@@ -1382,6 +1403,21 @@ func (r *mutationResolver) Updatechannelart(ctx context.Context, id string, chan
 	return &user, nil
 }
 
+func (r *queryResolver) Notifications(ctx context.Context) ([]*model.Notification, error) {
+	var notifs []*model.Notification
+
+	err := r.DB.Model(&notifs).Order("id DESC").Select()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Failed to query users")
+	} else {
+		log.Println("Get Users Succeed")
+	}
+
+	return notifs, nil
+}
+
 func (r *queryResolver) PostByUser(ctx context.Context, userid string) ([]*model.Post, error) {
 	var posts []*model.Post
 
@@ -1693,13 +1729,13 @@ func (r *queryResolver) VideosByUser(ctx context.Context, userid string, sort st
 func (r *queryResolver) VideosByCategory(ctx context.Context, category string, sortBy string, premi string) ([]*model.Video, error) {
 	var videos []*model.Video
 
-	if(sortBy == "view"){
+	if sortBy == "view" {
 		err := r.DB.Model(&videos).Order("view DESC").Where("category = ? and premium != ? and visibility = ?", category, premi, "public").Select()
 
 		if err != nil {
 			return nil, errors.New("Failed to query videos")
 		}
-	} else if (sortBy == "date") {
+	} else if sortBy == "date" {
 		err := r.DB.Model(&videos).Order("year DESC", "month DESC", "day DESC").Where("category = ? and premium != ? and visibility = ?", category, premi, "public").Select()
 
 		if err != nil {

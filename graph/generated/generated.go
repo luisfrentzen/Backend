@@ -70,6 +70,7 @@ type ComplexityRoot struct {
 		Archiveplaylist        func(childComplexity int, id string, plid string) int
 		CreateComment          func(childComplexity int, input *model.NewComment) int
 		CreateLink             func(childComplexity int, input *model.NewLink) int
+		CreateNotif            func(childComplexity int, input *model.NewNotification) int
 		CreatePlaylist         func(childComplexity int, input *model.NewPlaylist) int
 		CreatePost             func(childComplexity int, input *model.NewPost) int
 		CreateUser             func(childComplexity int, input *model.NewUser) int
@@ -105,6 +106,13 @@ type ComplexityRoot struct {
 		ViewVideo              func(childComplexity int, id string) int
 	}
 
+	Notification struct {
+		ID     func(childComplexity int) int
+		Title  func(childComplexity int) int
+		Userid func(childComplexity int) int
+		Vidthm func(childComplexity int) int
+	}
+
 	Playlist struct {
 		Day        func(childComplexity int) int
 		Desc       func(childComplexity int) int
@@ -138,6 +146,7 @@ type ComplexityRoot struct {
 		CommentsByVideo     func(childComplexity int, videoid int, sort string) int
 		GetArchivedPlaylist func(childComplexity int, ids string) int
 		LinkByUser          func(childComplexity int, userid string) int
+		Notifications       func(childComplexity int) int
 		PlaylistByID        func(childComplexity int, id int) int
 		Playlists           func(childComplexity int) int
 		PlaylistsByUser     func(childComplexity int, userid string, visibility string) int
@@ -211,6 +220,7 @@ type MutationResolver interface {
 	ShuffleVideos(ctx context.Context, plid string) (*model.Playlist, error)
 	CreateLink(ctx context.Context, input *model.NewLink) (*model.Link, error)
 	CreatePost(ctx context.Context, input *model.NewPost) (*model.Post, error)
+	CreateNotif(ctx context.Context, input *model.NewNotification) (*model.Notification, error)
 	CreateUser(ctx context.Context, input *model.NewUser) (*model.User, error)
 	UpdateUser(ctx context.Context, id string, input *model.NewUser) (*model.User, error)
 	DeleteUser(ctx context.Context, id string) (bool, error)
@@ -247,6 +257,7 @@ type MutationResolver interface {
 	Updatechannelart(ctx context.Context, id string, channelart string) (*model.User, error)
 }
 type QueryResolver interface {
+	Notifications(ctx context.Context) ([]*model.Notification, error)
 	PostByUser(ctx context.Context, userid string) ([]*model.Post, error)
 	PostByID(ctx context.Context, id int) (*model.Post, error)
 	CommentByPost(ctx context.Context, id int) ([]*model.Comment, error)
@@ -448,6 +459,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateLink(childComplexity, args["input"].(*model.NewLink)), true
+
+	case "Mutation.createNotif":
+		if e.complexity.Mutation.CreateNotif == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createNotif_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateNotif(childComplexity, args["input"].(*model.NewNotification)), true
 
 	case "Mutation.createPlaylist":
 		if e.complexity.Mutation.CreatePlaylist == nil {
@@ -845,6 +868,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ViewVideo(childComplexity, args["id"].(string)), true
 
+	case "Notification.id":
+		if e.complexity.Notification.ID == nil {
+			break
+		}
+
+		return e.complexity.Notification.ID(childComplexity), true
+
+	case "Notification.title":
+		if e.complexity.Notification.Title == nil {
+			break
+		}
+
+		return e.complexity.Notification.Title(childComplexity), true
+
+	case "Notification.userid":
+		if e.complexity.Notification.Userid == nil {
+			break
+		}
+
+		return e.complexity.Notification.Userid(childComplexity), true
+
+	case "Notification.vidthm":
+		if e.complexity.Notification.Vidthm == nil {
+			break
+		}
+
+		return e.complexity.Notification.Vidthm(childComplexity), true
+
 	case "Playlist.day":
 		if e.complexity.Playlist.Day == nil {
 			break
@@ -1056,6 +1107,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.LinkByUser(childComplexity, args["userid"].(string)), true
+
+	case "Query.notifications":
+		if e.complexity.Query.Notifications == nil {
+			break
+		}
+
+		return e.complexity.Query.Notifications(childComplexity), true
 
 	case "Query.playlistById":
 		if e.complexity.Query.PlaylistByID == nil {
@@ -1750,7 +1808,21 @@ input newComment {
   postid: Int!
 }
 
+type Notification {
+  id: ID!
+  userid: String!
+  vidthm: String!
+  title: String!
+}
+
+input newNotification {
+  userid: String!
+  vidthm: String!
+  title: String!
+}
+
 type Query {
+  notifications: [Notification!]!
   postByUser(userid: String!): [Post!]!
   postById(id: Int!): Post!
   commentByPost(id: Int!): [Comment!]!
@@ -1851,6 +1923,7 @@ type Mutation {
   createLink (input: newLink): Link!
 
   createPost (input: newPost): Post!
+  createNotif (input: newNotification): Notification!
 
   createUser (input: newUser): User!
   updateUser (id: ID!, input: newUser): User!
@@ -1969,6 +2042,20 @@ func (ec *executionContext) field_Mutation_createLink_args(ctx context.Context, 
 	var arg0 *model.NewLink
 	if tmp, ok := rawArgs["input"]; ok {
 		arg0, err = ec.unmarshalOnewLink2ᚖBackendᚋgraphᚋmodelᚐNewLink(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createNotif_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.NewNotification
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalOnewNotification2ᚖBackendᚋgraphᚋmodelᚐNewNotification(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3728,6 +3815,47 @@ func (ec *executionContext) _Mutation_createPost(ctx context.Context, field grap
 	return ec.marshalNPost2ᚖBackendᚋgraphᚋmodelᚐPost(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createNotif(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createNotif_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateNotif(rctx, args["input"].(*model.NewNotification))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Notification)
+	fc.Result = res
+	return ec.marshalNNotification2ᚖBackendᚋgraphᚋmodelᚐNotification(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -5122,6 +5250,142 @@ func (ec *executionContext) _Mutation_updatechannelart(ctx context.Context, fiel
 	return ec.marshalNUser2ᚖBackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Notification_id(ctx context.Context, field graphql.CollectedField, obj *model.Notification) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Notification",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Notification_userid(ctx context.Context, field graphql.CollectedField, obj *model.Notification) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Notification",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Userid, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Notification_vidthm(ctx context.Context, field graphql.CollectedField, obj *model.Notification) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Notification",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Vidthm, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Notification_title(ctx context.Context, field graphql.CollectedField, obj *model.Notification) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Notification",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Playlist_id(ctx context.Context, field graphql.CollectedField, obj *model.Playlist) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -5766,6 +6030,40 @@ func (ec *executionContext) _Post_year(ctx context.Context, field graphql.Collec
 	res := resTmp.(int)
 	fc.Result = res
 	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_notifications(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Notifications(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Notification)
+	fc.Result = res
+	return ec.marshalNNotification2ᚕᚖBackendᚋgraphᚋmodelᚐNotificationᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_postByUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -9450,6 +9748,36 @@ func (ec *executionContext) unmarshalInputnewLink(ctx context.Context, obj inter
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputnewNotification(ctx context.Context, obj interface{}) (model.NewNotification, error) {
+	var it model.NewNotification
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "userid":
+			var err error
+			it.Userid, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "vidthm":
+			var err error
+			it.Vidthm, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "title":
+			var err error
+			it.Title, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputnewPlaylist(ctx context.Context, obj interface{}) (model.NewPlaylist, error) {
 	var it model.NewPlaylist
 	var asMap = obj.(map[string]interface{})
@@ -10008,6 +10336,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createNotif":
+			out.Values[i] = ec._Mutation_createNotif(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "createUser":
 			out.Values[i] = ec._Mutation_createUser(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -10189,6 +10522,48 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
+var notificationImplementors = []string{"Notification"}
+
+func (ec *executionContext) _Notification(ctx context.Context, sel ast.SelectionSet, obj *model.Notification) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, notificationImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Notification")
+		case "id":
+			out.Values[i] = ec._Notification_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "userid":
+			out.Values[i] = ec._Notification_userid(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "vidthm":
+			out.Values[i] = ec._Notification_vidthm(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "title":
+			out.Values[i] = ec._Notification_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var playlistImplementors = []string{"Playlist"}
 
 func (ec *executionContext) _Playlist(ctx context.Context, sel ast.SelectionSet, obj *model.Playlist) graphql.Marshaler {
@@ -10343,6 +10718,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "notifications":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_notifications(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "postByUser":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -11351,6 +11740,57 @@ func (ec *executionContext) marshalNLink2ᚖBackendᚋgraphᚋmodelᚐLink(ctx c
 	return ec._Link(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNNotification2BackendᚋgraphᚋmodelᚐNotification(ctx context.Context, sel ast.SelectionSet, v model.Notification) graphql.Marshaler {
+	return ec._Notification(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNNotification2ᚕᚖBackendᚋgraphᚋmodelᚐNotificationᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Notification) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNNotification2ᚖBackendᚋgraphᚋmodelᚐNotification(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNNotification2ᚖBackendᚋgraphᚋmodelᚐNotification(ctx context.Context, sel ast.SelectionSet, v *model.Notification) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Notification(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNPlaylist2BackendᚋgraphᚋmodelᚐPlaylist(ctx context.Context, sel ast.SelectionSet, v model.Playlist) graphql.Marshaler {
 	return ec._Playlist(ctx, sel, &v)
 }
@@ -12085,6 +12525,18 @@ func (ec *executionContext) unmarshalOnewLink2ᚖBackendᚋgraphᚋmodelᚐNewLi
 		return nil, nil
 	}
 	res, err := ec.unmarshalOnewLink2BackendᚋgraphᚋmodelᚐNewLink(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalOnewNotification2BackendᚋgraphᚋmodelᚐNewNotification(ctx context.Context, v interface{}) (model.NewNotification, error) {
+	return ec.unmarshalInputnewNotification(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOnewNotification2ᚖBackendᚋgraphᚋmodelᚐNewNotification(ctx context.Context, v interface{}) (*model.NewNotification, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOnewNotification2BackendᚋgraphᚋmodelᚐNewNotification(ctx, v)
 	return &res, err
 }
 

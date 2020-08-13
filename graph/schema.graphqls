@@ -127,7 +127,21 @@ input newComment {
   postid: Int!
 }
 
+type Notification {
+  id: ID!
+  userid: String!
+  vidthm: String!
+  title: String!
+}
+
+input newNotification {
+  userid: String!
+  vidthm: String!
+  title: String!
+}
+
 type Query {
+  notifications: [Notification!]!
   postByUser(userid: String!): [Post!]!
   postById(id: Int!): Post!
   commentByPost(id: Int!): [Comment!]!
@@ -228,6 +242,7 @@ type Mutation {
   createLink (input: newLink): Link!
 
   createPost (input: newPost): Post!
+  createNotif (input: newNotification): Notification!
 
   createUser (input: newUser): User!
   updateUser (id: ID!, input: newUser): User!

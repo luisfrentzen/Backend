@@ -24,6 +24,13 @@ type Link struct {
 	Userid string `json:"userid"`
 }
 
+type Notification struct {
+	ID     string `json:"id"`
+	Userid string `json:"userid"`
+	Vidthm string `json:"vidthm"`
+	Title  string `json:"title"`
+}
+
 type Playlist struct {
 	ID         string `json:"id"`
 	Title      string `json:"title"`
@@ -119,6 +126,12 @@ type NewLink struct {
 	Label  string `json:"label"`
 	URL    string `json:"url"`
 	Userid string `json:"userid"`
+}
+
+type NewNotification struct {
+	Userid string `json:"userid"`
+	Vidthm string `json:"vidthm"`
+	Title  string `json:"title"`
 }
 
 type NewPlaylist struct {
