@@ -676,7 +676,6 @@ func (r *mutationResolver) Subscribe(ctx context.Context, id string, chnid strin
 					user.Notified = strings.Join(n, ",")
 				}
 
-
 				channel.Subscribers = channel.Subscribers - 1
 				subscribed = true
 				break
@@ -1477,10 +1476,12 @@ func (r *mutationResolver) Updatechannelart(ctx context.Context, id string, chan
 	return &user, nil
 }
 
-func (r *queryResolver) Notifications(ctx context.Context) ([]*model.Notification, error) {
+func (r *queryResolver) Notifications(ctx context.Context, ids string) ([]*model.Notification, error) {
 	var notifs []*model.Notification
 
-	err := r.DB.Model(&notifs).Order("id DESC").Select()
+	s := strings.Split(ids, ",")
+
+	err := r.DB.Model(&notifs).Order("id DESC").Where("userid IN (?)", pg.Strings(s)).Select()
 
 	if err != nil {
 		log.Println(err)

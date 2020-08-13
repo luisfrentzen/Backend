@@ -147,7 +147,7 @@ type ComplexityRoot struct {
 		CommentsByVideo     func(childComplexity int, videoid int, sort string) int
 		GetArchivedPlaylist func(childComplexity int, ids string) int
 		LinkByUser          func(childComplexity int, userid string) int
-		Notifications       func(childComplexity int) int
+		Notifications       func(childComplexity int, ids string) int
 		PlaylistByID        func(childComplexity int, id int) int
 		Playlists           func(childComplexity int) int
 		PlaylistsByUser     func(childComplexity int, userid string, visibility string) int
@@ -260,7 +260,7 @@ type MutationResolver interface {
 	Updatechannelart(ctx context.Context, id string, channelart string) (*model.User, error)
 }
 type QueryResolver interface {
-	Notifications(ctx context.Context) ([]*model.Notification, error)
+	Notifications(ctx context.Context, ids string) ([]*model.Notification, error)
 	PostByUser(ctx context.Context, userid string) ([]*model.Post, error)
 	PostByID(ctx context.Context, id int) (*model.Post, error)
 	CommentByPost(ctx context.Context, id int) ([]*model.Comment, error)
@@ -1128,7 +1128,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.Notifications(childComplexity), true
+		args, err := ec.field_Query_notifications_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Notifications(childComplexity, args["ids"].(string)), true
 
 	case "Query.playlistById":
 		if e.complexity.Query.PlaylistByID == nil {
@@ -1845,7 +1850,7 @@ input newNotification {
 }
 
 type Query {
-  notifications : [Notification!]!
+  notifications(ids: String!) : [Notification!]!
   postByUser(userid: String!): [Post!]!
   postById(id: Int!): Post!
   commentByPost(id: Int!): [Comment!]!
@@ -2859,6 +2864,20 @@ func (ec *executionContext) field_Query_linkByUser_args(ctx context.Context, raw
 		}
 	}
 	args["userid"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_notifications_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["ids"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ids"] = arg0
 	return args, nil
 }
 
@@ -6134,9 +6153,16 @@ func (ec *executionContext) _Query_notifications(ctx context.Context, field grap
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_notifications_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Notifications(rctx)
+		return ec.resolvers.Query().Notifications(rctx, args["ids"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

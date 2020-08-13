@@ -142,7 +142,7 @@ input newNotification {
 }
 
 type Query {
-  notifications : [Notification!]!
+  notifications(ids: String!) : [Notification!]!
   postByUser(userid: String!): [Post!]!
   postById(id: Int!): Post!
   commentByPost(id: Int!): [Comment!]!
