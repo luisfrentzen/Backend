@@ -666,6 +666,17 @@ func (r *mutationResolver) Subscribe(ctx context.Context, id string, chnid strin
 					s = append(s[:idx], s[idx+1:]...)
 				}
 
+				if strings.Contains(user.Notified, chnid) {
+					n := strings.Split(user.Notified, ",")
+					for idx, e := range n {
+						if e == chnid {
+							n = append(n[:idx], s[idx+1:]...)
+						}
+					}
+					user.Notified = strings.Join(n, ",")
+				}
+
+
 				channel.Subscribers = channel.Subscribers - 1
 				subscribed = true
 				break
