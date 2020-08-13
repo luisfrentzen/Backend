@@ -670,7 +670,7 @@ func (r *mutationResolver) Subscribe(ctx context.Context, id string, chnid strin
 					n := strings.Split(user.Notified, ",")
 					for idx, e := range n {
 						if e == chnid {
-							n = append(n[:idx], s[idx+1:]...)
+							n = append(n[:idx], n[idx+1:]...)
 						}
 					}
 					user.Notified = strings.Join(n, ",")
