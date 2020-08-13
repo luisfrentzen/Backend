@@ -98,7 +98,7 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input *model.NewPost)
 
 func (r *mutationResolver) CreateNotif(ctx context.Context, input *model.NewNotification) (*model.Notification, error) {
 	notif := model.Notification{
-		Title:       input.Title,
+		Title:  input.Title,
 		Vidthm: input.Vidthm,
 		Userid: input.Userid,
 	}
@@ -693,6 +693,69 @@ func (r *mutationResolver) Subscribe(ctx context.Context, id string, chnid strin
 	if updateErr2 != nil {
 		log.Println(updateErr2)
 		return nil, errors.New("Update channel failed")
+	}
+
+	return &user, nil
+}
+
+func (r *mutationResolver) Bellnotif(ctx context.Context, id string, chnid string) (*model.User, error) {
+	var user model.User
+
+	log.Println("Getting User")
+
+	err := r.DB.Model(&user).Where("id = ?", id).First()
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("User not found!")
+	}
+
+	var channel model.User
+
+	log.Println("Getting Channel")
+
+	err2 := r.DB.Model(&channel).Where("id = ?", chnid).First()
+
+	if err2 != nil {
+		log.Println(err2)
+		return nil, errors.New("Channel not found!")
+	}
+
+	s := strings.Split(user.Notified, ",")
+
+	if s[0] == "" {
+		user.Notified = chnid
+
+	} else {
+		var subscribed = false
+
+		for idx, i := range s {
+			if i == chnid {
+				//log.Println(len(s))
+				if len(s) == 1 {
+					s = nil
+				} else {
+					s = append(s[:idx], s[idx+1:]...)
+				}
+
+				subscribed = true
+				break
+			}
+		}
+
+		if subscribed == false {
+			s = append(s, chnid)
+		}
+
+		user.Notified = strings.Join(s, ",")
+
+	}
+
+	_, updateErr := r.DB.Model(&user).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return nil, errors.New("Update user failed")
 	}
 
 	return &user, nil

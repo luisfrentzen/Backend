@@ -68,6 +68,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		AddToPlaylist          func(childComplexity int, id string, input *model.AddToPlaylist) int
 		Archiveplaylist        func(childComplexity int, id string, plid string) int
+		Bellnotif              func(childComplexity int, id string, chnid string) int
 		CreateComment          func(childComplexity int, input *model.NewComment) int
 		CreateLink             func(childComplexity int, input *model.NewLink) int
 		CreateNotif            func(childComplexity int, input *model.NewNotification) int
@@ -181,6 +182,7 @@ type ComplexityRoot struct {
 		Likedvideos       func(childComplexity int) int
 		Month             func(childComplexity int) int
 		Name              func(childComplexity int) int
+		Notified          func(childComplexity int) int
 		Premiday          func(childComplexity int) int
 		Premimonth        func(childComplexity int) int
 		Premitype         func(childComplexity int) int
@@ -238,6 +240,7 @@ type MutationResolver interface {
 	ViewPlaylist(ctx context.Context, id string) (*model.Playlist, error)
 	MakeUserPremium(ctx context.Context, id string, subType string) (*model.User, error)
 	Subscribe(ctx context.Context, id string, chnid string) (*model.User, error)
+	Bellnotif(ctx context.Context, id string, chnid string) (*model.User, error)
 	Likevid(ctx context.Context, id string, chnid string) (*model.User, error)
 	Disilikevid(ctx context.Context, id string, chnid string) (*model.User, error)
 	Likecom(ctx context.Context, id string, chnid string) (*model.User, error)
@@ -435,6 +438,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Archiveplaylist(childComplexity, args["id"].(string), args["plid"].(string)), true
+
+	case "Mutation.bellnotif":
+		if e.complexity.Mutation.Bellnotif == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_bellnotif_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Bellnotif(childComplexity, args["id"].(string), args["chnid"].(string)), true
 
 	case "Mutation.createComment":
 		if e.complexity.Mutation.CreateComment == nil {
@@ -1412,6 +1427,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Name(childComplexity), true
 
+	case "User.notified":
+		if e.complexity.User.Notified == nil {
+			break
+		}
+
+		return e.complexity.User.Notified(childComplexity), true
+
 	case "User.premiday":
 		if e.complexity.User.Premiday == nil {
 			break
@@ -1692,6 +1714,7 @@ type User {
   likedcomments: String!
   disilikedcomments: String!
   subscribed: String!
+  notified: String!
   subscribers: Int!
   likedpost: String!
   disilikedpost: String!
@@ -1822,7 +1845,7 @@ input newNotification {
 }
 
 type Query {
-  notifications: [Notification!]!
+  notifications : [Notification!]!
   postByUser(userid: String!): [Post!]!
   postById(id: Int!): Post!
   commentByPost(id: Int!): [Comment!]!
@@ -1948,6 +1971,7 @@ type Mutation {
   makeUserPremium(id: String!, subType:String!): User!
 
   subscribe (id: String!, chnid: String!): User!
+  bellnotif (id: String!, chnid: String!): User!
   likevid (id: String!, chnid: String!): User!
   disilikevid (id: String!, chnid: String!): User!
   likecom (id: String!, chnid: String!): User!
@@ -2019,6 +2043,28 @@ func (ec *executionContext) field_Mutation_archiveplaylist_args(ctx context.Cont
 		}
 	}
 	args["plid"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_bellnotif_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["chnid"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["chnid"] = arg1
 	return args, nil
 }
 
@@ -4537,6 +4583,47 @@ func (ec *executionContext) _Mutation_subscribe(ctx context.Context, field graph
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().Subscribe(rctx, args["id"].(string), args["chnid"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖBackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_bellnotif(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_bellnotif_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Bellnotif(rctx, args["id"].(string), args["chnid"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -7429,6 +7516,40 @@ func (ec *executionContext) _User_subscribed(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Subscribed, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_notified(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Notified, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10426,6 +10547,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "bellnotif":
+			out.Values[i] = ec._Mutation_bellnotif(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "likevid":
 			out.Values[i] = ec._Mutation_likevid(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -11150,6 +11276,11 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "subscribed":
 			out.Values[i] = ec._User_subscribed(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "notified":
+			out.Values[i] = ec._User_notified(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

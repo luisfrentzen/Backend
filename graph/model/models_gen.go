@@ -66,6 +66,7 @@ type User struct {
 	Likedcomments     string `json:"likedcomments"`
 	Disilikedcomments string `json:"disilikedcomments"`
 	Subscribed        string `json:"subscribed"`
+	Notified          string `json:"notified"`
 	Subscribers       int    `json:"subscribers"`
 	Likedpost         string `json:"likedpost"`
 	Disilikedpost     string `json:"disilikedpost"`

@@ -11,6 +11,7 @@ type User {
   likedcomments: String!
   disilikedcomments: String!
   subscribed: String!
+  notified: String!
   subscribers: Int!
   likedpost: String!
   disilikedpost: String!
@@ -267,6 +268,7 @@ type Mutation {
   makeUserPremium(id: String!, subType:String!): User!
 
   subscribe (id: String!, chnid: String!): User!
+  bellnotif (id: String!, chnid: String!): User!
   likevid (id: String!, chnid: String!): User!
   disilikevid (id: String!, chnid: String!): User!
   likecom (id: String!, chnid: String!): User!
