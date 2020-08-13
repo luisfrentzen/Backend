@@ -1421,7 +1421,7 @@ func (r *queryResolver) Notifications(ctx context.Context) ([]*model.Notificatio
 func (r *queryResolver) PostByUser(ctx context.Context, userid string) ([]*model.Post, error) {
 	var posts []*model.Post
 
-	err := r.DB.Model(&posts).Order("year DESC", "month DESC", "day DESC").Where("userid = ?", userid).Select()
+	err := r.DB.Model(&posts).Order("year DESC", "month DESC", "day DESC", "id DESC").Where("userid = ?", userid).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlists")
